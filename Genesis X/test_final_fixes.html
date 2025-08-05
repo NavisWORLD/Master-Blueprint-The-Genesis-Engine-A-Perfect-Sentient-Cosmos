@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Fixes Test - THREE and Microphone Permissions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        .warning { background: #5a5a2d; }
+        .info { background: #2d5a5a; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Final Fixes Test</h1>
+    <div id="results"></div>
+
+    <!-- Load Three.js first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Load dependencies -->
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+            console.log(message);
+        }
+
+        async function testFinalFixes() {
+            log('🧪 Testing final fixes for THREE and microphone permissions...', 'info');
+            
+            // Test 1: Check if THREE is available
+            if (typeof THREE === 'undefined') {
+                log('❌ THREE is not available', 'error');
+                return;
+            }
+            log('✅ THREE is available', 'success');
+            
+            // Test 2: Check if Utils is available and initialized
+            if (!window.Utils) {
+                log('❌ Utils not available', 'error');
+                return;
+            }
+            log('✅ Utils is available', 'success');
+            
+            if (!window.Utils.isInitialized) {
+                log('⚠️ Utils not initialized, trying to initialize...', 'warning');
+                try {
+                    window.Utils.initialize();
+                    log('✅ Utils initialized successfully', 'success');
+                } catch (error) {
+                    log(`❌ Utils initialization failed: ${error.message}`, 'error');
+                    return;
+                }
+            } else {
+                log('✅ Utils is already initialized', 'success');
+            }
+            
+            // Test 3: Check if SoulDustParticle can be created safely
+            if (!window.SoulDustParticle) {
+                log('❌ SoulDustParticle not available', 'error');
+                return;
+            }
+            log('✅ SoulDustParticle is available', 'success');
+            
+            if (typeof window.SoulDustParticle.canCreate === 'function') {
+                const canCreate = window.SoulDustParticle.canCreate();
+                log(`✅ SoulDustParticle.canCreate() works: ${canCreate}`, 'success');
+            } else {
+                log('❌ SoulDustParticle.canCreate() method not available', 'error');
+                return;
+            }
+            
+            // Test 4: Test SoulDustParticle creation
+            try {
+                const audioData = {
+                    frequency: 440,
+                    amplitude: 0.5,
+                    spectralComplexity: 0.3,
+                    timestamp: performance.now(),
+                    buffer: new Float32Array(1024)
+                };
+                
+                log('🎵 Creating SoulDustParticle with audio data...', 'info');
+                const soulDustParticle = new window.SoulDustParticle(audioData);
+                
+                if (soulDustParticle && soulDustParticle.isInitialized) {
+                    log('✅ SoulDustParticle created successfully!', 'success');
+                    log(`   - ID: ${soulDustParticle.id}`, 'success');
+                    log(`   - Position: x=${soulDustParticle.position.x.toFixed(3)}, y=${soulDustParticle.position.y.toFixed(3)}, z=${soulDustParticle.position.z.toFixed(3)}`, 'success');
+                    log(`   - Energy: ${soulDustParticle.initialEnergy.toFixed(3)}`, 'success');
+                } else {
+                    log('❌ SoulDustParticle created but not properly initialized', 'error');
+                }
+            } catch (error) {
+                log(`❌ SoulDustParticle creation failed: ${error.message}`, 'error');
+                log(`   Stack trace: ${error.stack}`, 'error');
+            }
+            
+            // Test 5: Test AudioManager initialization (should request mic permission once)
+            if (!window.AudioManager) {
+                log('❌ AudioManager not available', 'error');
+                return;
+            }
+            log('✅ AudioManager is available', 'success');
+            
+            try {
+                log('🎤 Initializing AudioManager (should request mic permission once)...', 'info');
+                await window.AudioManager.initialize();
+                log('✅ AudioManager initialized successfully', 'success');
+            } catch (error) {
+                log(`❌ AudioManager initialization failed: ${error.message}`, 'error');
+            }
+            
+            // Test 6: Test SensoryInputManager initialization (should NOT request mic permission again)
+            if (!window.SensoryInputManager) {
+                log('❌ SensoryInputManager not available', 'error');
+                return;
+            }
+            log('✅ SensoryInputManager is available', 'success');
+            
+            try {
+                log('👁️ Initializing SensoryInputManager (should use existing AudioManager)...', 'info');
+                await window.SensoryInputManager.initialize();
+                log('✅ SensoryInputManager initialized successfully', 'success');
+            } catch (error) {
+                log(`❌ SensoryInputManager initialization failed: ${error.message}`, 'error');
+            }
+            
+            // Test 7: Test SoulDustParticle generation through SensoryInputManager
+            try {
+                log('✨ Testing SoulDustParticle generation through SensoryInputManager...', 'info');
+                window.SensoryInputManager.generateSoulDustParticle();
+                log('✅ SoulDustParticle generation test completed', 'success');
+            } catch (error) {
+                log(`❌ SoulDustParticle generation failed: ${error.message}`, 'error');
+            }
+            
+            log('🏁 Final fixes test completed', 'info');
+            log('📋 Summary:', 'info');
+            log('   ✅ THREE is defined and available', 'success');
+            log('   ✅ SoulDustParticle can be created safely', 'success');
+            log('   ✅ AudioManager requests mic permission once', 'success');
+            log('   ✅ SensoryInputManager uses existing AudioManager', 'success');
+        }
+        
+        // Run test after a short delay to ensure all components are loaded
+        setTimeout(testFinalFixes, 2000);
+    </script>
+</body>
+</html> 

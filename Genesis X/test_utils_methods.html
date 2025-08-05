@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utils Methods Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        .warning { background: #5a5a2d; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Utils Methods Test</h1>
+    <div id="results"></div>
+
+    <!-- Load Utils -->
+    <script src="modules/core/Utils.js"></script>
+    
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+            console.log(message);
+        }
+
+        function testUtilsMethods() {
+            log('🧪 Testing Utils methods...', 'info');
+            
+            // Test 1: Check if Utils is available
+            if (!window.Utils) {
+                log('❌ Utils not available', 'error');
+                return;
+            }
+            log('✅ Utils is available', 'success');
+            
+            // Test 2: Check if Utils is initialized
+            if (!window.Utils.isInitialized) {
+                log('⚠️ Utils not initialized, trying to initialize...', 'warning');
+                try {
+                    window.Utils.initialize();
+                    log('✅ Utils initialized successfully', 'success');
+                } catch (error) {
+                    log(`❌ Utils initialization failed: ${error.message}`, 'error');
+                    return;
+                }
+            } else {
+                log('✅ Utils is already initialized', 'success');
+            }
+            
+            // Test 3: Test randomPointOnSphere
+            try {
+                const spherePoint = window.Utils.randomPointOnSphere();
+                if (spherePoint && typeof spherePoint.x === 'number' && 
+                    typeof spherePoint.y === 'number' && 
+                    typeof spherePoint.z === 'number') {
+                    log(`✅ randomPointOnSphere works: x=${spherePoint.x.toFixed(3)}, y=${spherePoint.y.toFixed(3)}, z=${spherePoint.z.toFixed(3)}`, 'success');
+                } else {
+                    log('❌ randomPointOnSphere returned invalid object', 'error');
+                }
+            } catch (error) {
+                log(`❌ randomPointOnSphere failed: ${error.message}`, 'error');
+            }
+            
+            // Test 4: Test randomPointInSphere
+            try {
+                const spherePoint = window.Utils.randomPointInSphere(10);
+                if (spherePoint && typeof spherePoint.x === 'number' && 
+                    typeof spherePoint.y === 'number' && 
+                    typeof spherePoint.z === 'number') {
+                    log(`✅ randomPointInSphere works: x=${spherePoint.x.toFixed(3)}, y=${spherePoint.y.toFixed(3)}, z=${spherePoint.z.toFixed(3)}`, 'success');
+                } else {
+                    log('❌ randomPointInSphere returned invalid object', 'error');
+                }
+            } catch (error) {
+                log(`❌ randomPointInSphere failed: ${error.message}`, 'error');
+            }
+            
+            // Test 5: Test generateUUID
+            try {
+                const uuid = window.Utils.generateUUID();
+                if (uuid && typeof uuid === 'string' && uuid.length > 0) {
+                    log(`✅ generateUUID works: ${uuid}`, 'success');
+                } else {
+                    log('❌ generateUUID returned invalid value', 'error');
+                }
+            } catch (error) {
+                log(`❌ generateUUID failed: ${error.message}`, 'error');
+            }
+            
+            // Test 6: Test random
+            try {
+                const randomValue = window.Utils.random(1, 10);
+                if (typeof randomValue === 'number' && randomValue >= 1 && randomValue <= 10) {
+                    log(`✅ random works: ${randomValue}`, 'success');
+                } else {
+                    log('❌ random returned invalid value', 'error');
+                }
+            } catch (error) {
+                log(`❌ random failed: ${error.message}`, 'error');
+            }
+            
+            // Test 7: Test getConfig
+            try {
+                const config = window.Utils.getConfig('test.value', 'default');
+                if (config === 'default') {
+                    log('✅ getConfig works with default value', 'success');
+                } else {
+                    log(`✅ getConfig works: ${config}`, 'success');
+                }
+            } catch (error) {
+                log(`❌ getConfig failed: ${error.message}`, 'error');
+            }
+            
+            log('🏁 Utils methods test completed', 'info');
+        }
+        
+        // Run test after a short delay to ensure Utils is loaded
+        setTimeout(testUtilsMethods, 1000);
+    </script>
+</body>
+</html> 

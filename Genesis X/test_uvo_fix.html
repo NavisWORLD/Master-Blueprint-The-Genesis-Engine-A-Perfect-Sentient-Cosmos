@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UVO Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #0a0; }
+        .error { background: #a00; }
+        .info { background: #00a; }
+    </style>
+</head>
+<body>
+    <h1>UVO Fix Test</h1>
+    <div id="results"></div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        function testUVO() {
+            addResult('🧪 Testing UVO Fix...', 'info');
+            
+            // Test 1: Check if UVO global instance exists
+            if (window.UVO) {
+                addResult('✅ UVO global instance exists', 'success');
+            } else {
+                addResult('❌ UVO global instance is undefined', 'error');
+                return;
+            }
+
+            // Test 2: Check if UVO has initialize method
+            if (typeof window.UVO.initialize === 'function') {
+                addResult('✅ UVO has initialize method', 'success');
+            } else {
+                addResult('❌ UVO does not have initialize method', 'error');
+                return;
+            }
+
+            // Test 3: Try to initialize UVO
+            try {
+                window.UVO.initialize();
+                addResult('✅ UVO initialization successful', 'success');
+            } catch (error) {
+                addResult(`❌ UVO initialization failed: ${error.message}`, 'error');
+                return;
+            }
+
+            // Test 4: Check UVO properties
+            if (window.UVO.vibrationalField && window.UVO.vibrationalField instanceof Map) {
+                addResult('✅ UVO vibrational field is properly initialized', 'success');
+            } else {
+                addResult('❌ UVO vibrational field is not properly initialized', 'error');
+            }
+
+            // Test 5: Check grid size
+            if (window.UVO.gridSize === 20) {
+                addResult('✅ UVO grid size is correctly set to 20', 'success');
+            } else {
+                addResult(`❌ UVO grid size is ${window.UVO.gridSize}, expected 20`, 'error');
+            }
+
+            addResult('🎉 UVO Fix Test Complete!', 'success');
+        }
+
+        // Run test after a short delay to ensure all scripts are loaded
+        setTimeout(testUVO, 1000);
+    </script>
+</body>
+</html> 

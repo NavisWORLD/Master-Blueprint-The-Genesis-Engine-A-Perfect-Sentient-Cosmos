@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Engine - Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #00aaff;
+            border-radius: 5px;
+        }
+        
+        .debug-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+        }
+        
+        .warning {
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+        }
+        
+        button {
+            background: #00aaff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0088cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Genesis Engine - Debug Test</h1>
+    
+    <div class="debug-section">
+        <h2>🔍 Script Loading Debug</h2>
+        <div id="script-debug"></div>
+        <button onclick="debugScriptLoading()">Debug Script Loading</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>🔧 Component Availability Debug</h2>
+        <div id="component-debug"></div>
+        <button onclick="debugComponents()">Debug Components</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>🚀 Engine Debug</h2>
+        <div id="engine-debug"></div>
+        <button onclick="debugEngine()">Debug Engine</button>
+    </div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Audio and Sensory -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Rendering -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- AI and Creation -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Universe Management -->
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- Controls -->
+    <script src="modules/controls/PlayerControls.js"></script>
+    
+    <!-- UI and Controls -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+    <script src="init_components.js"></script>
+
+    <script>
+        function addDebugResult(containerId, message, type = 'success') {
+            const container = document.getElementById(containerId);
+            const result = document.createElement('div');
+            result.className = `debug-result ${type}`;
+            result.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            container.appendChild(result);
+        }
+
+        function debugScriptLoading() {
+            const container = document.getElementById('script-debug');
+            container.innerHTML = '';
+            
+            addDebugResult('script-debug', '=== Script Loading Debug ===', 'warning');
+            
+            // Check if Three.js is loaded
+            if (typeof THREE !== 'undefined') {
+                addDebugResult('script-debug', '✅ Three.js loaded successfully');
+            } else {
+                addDebugResult('script-debug', '❌ Three.js not loaded', 'error');
+            }
+            
+            // Check if Tone.js is loaded
+            if (typeof Tone !== 'undefined') {
+                addDebugResult('script-debug', '✅ Tone.js loaded successfully');
+            } else {
+                addDebugResult('script-debug', '❌ Tone.js not loaded', 'error');
+            }
+            
+            // Check if SimplexNoise is loaded
+            if (typeof SimplexNoise !== 'undefined') {
+                addDebugResult('script-debug', '✅ SimplexNoise loaded successfully');
+            } else {
+                addDebugResult('script-debug', '❌ SimplexNoise not loaded', 'error');
+            }
+            
+            // Check if GSAP is loaded
+            if (typeof gsap !== 'undefined') {
+                addDebugResult('script-debug', '✅ GSAP loaded successfully');
+            } else {
+                addDebugResult('script-debug', '❌ GSAP not loaded', 'error');
+            }
+        }
+
+        function debugComponents() {
+            const container = document.getElementById('component-debug');
+            container.innerHTML = '';
+            
+            addDebugResult('component-debug', '=== Component Availability Debug ===', 'warning');
+            
+            const components = [
+                'EventBus', 'Config', 'Utils', 'Token', 'TokenizationEngine', 'PlayerControls',
+                'UVO', 'UnifiedFormula', 'CST',
+                'AudioManager', 'SensoryInputManager', 
+                'SoulDustParticle', 'QuantumEventManager',
+                'Renderer', 'PostProcessor', 'Shaders', 
+                'UIManager', 'PerformanceMonitor',
+                'AIConsciousness', 'ProceduralGenerationEngine', 'ObjectLibrary',
+                'UniverseManager', 'CameraController', 'InfiniteScaling', 'GenesisEngine'
+            ];
+            
+            components.forEach(component => {
+                if (window[component]) {
+                    addDebugResult('component-debug', `✅ ${component}: Available`);
+                    
+                    // Check if it has initialize method
+                    if (window[component].initialize && typeof window[component].initialize === 'function') {
+                        addDebugResult('component-debug', `   - ${component}.initialize(): Available`);
+                    } else {
+                        addDebugResult('component-debug', `   - ${component}.initialize(): NOT AVAILABLE`, 'error');
+                    }
+                    
+                    // Check if it's initialized
+                    if (window[component].isInitialized !== undefined) {
+                        addDebugResult('component-debug', `   - ${component}.isInitialized: ${window[component].isInitialized}`);
+                    }
+                } else {
+                    addDebugResult('component-debug', `❌ ${component}: UNDEFINED`, 'error');
+                }
+            });
+        }
+
+        function debugEngine() {
+            const container = document.getElementById('engine-debug');
+            container.innerHTML = '';
+            
+            addDebugResult('engine-debug', '=== Engine Debug ===', 'warning');
+            
+            try {
+                if (window.GenesisEngine) {
+                    addDebugResult('engine-debug', '✅ GenesisEngine instance available');
+                    
+                    // Use the existing global instance
+                    const engine = window.GenesisEngine;
+                    addDebugResult('engine-debug', '✅ GenesisEngine instance retrieved');
+                    
+                    // Test initialization
+                    engine.initialize().then(() => {
+                        addDebugResult('engine-debug', '✅ GenesisEngine initialized successfully');
+                    }).catch(error => {
+                        addDebugResult('engine-debug', `❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                        addDebugResult('engine-debug', `Error stack: ${error.stack}`, 'error');
+                    });
+                } else {
+                    addDebugResult('engine-debug', '❌ GenesisEngine not available', 'error');
+                }
+            } catch (error) {
+                addDebugResult('engine-debug', `❌ Engine error: ${error.message}`, 'error');
+                addDebugResult('engine-debug', `Error stack: ${error.stack}`, 'error');
+            }
+        }
+
+        // Run debug when page loads
+        window.addEventListener('load', function() {
+            console.log('🔍 Running Genesis Engine debug...');
+            
+            // Wait a bit for all scripts to load
+            setTimeout(() => {
+                debugScriptLoading();
+                debugComponents();
+                debugEngine();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

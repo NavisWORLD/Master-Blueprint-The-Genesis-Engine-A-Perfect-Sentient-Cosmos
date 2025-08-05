@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robust Dependencies Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #00ff00;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffff00; }
+        .info { color: #00ffff; }
+        button {
+            background: #333;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+        #log {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Robust Dependencies Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <button onclick="testDependencies()">Test Dependencies</button>
+        <button onclick="testEngineInitialization()">Test Engine Init</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        let logElement;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : 
+                            type === 'error' ? 'error' : 
+                            type === 'warning' ? 'warning' : 'info';
+            
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.innerHTML += `<span class="${className}">${logEntry}</span>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function clearLog() {
+            logElement.innerHTML = '';
+        }
+        
+        // Load dependencies with fallbacks
+        function loadDependencies() {
+            return new Promise((resolve) => {
+                let loadedCount = 0;
+                const totalDependencies = 4;
+                
+                function checkComplete() {
+                    loadedCount++;
+                    if (loadedCount >= totalDependencies) {
+                        log('✅ All dependencies loaded', 'success');
+                        resolve();
+                    }
+                }
+                
+                // Load Three.js
+                if (typeof THREE === 'undefined') {
+                    log('📦 Loading Three.js...', 'info');
+                    const threeScript = document.createElement('script');
+                    threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+                    threeScript.onload = () => {
+                        log('✅ Three.js loaded successfully', 'success');
+                        checkComplete();
+                    };
+                    threeScript.onerror = () => {
+                        log('❌ Three.js failed to load', 'error');
+                        checkComplete();
+                    };
+                    document.head.appendChild(threeScript);
+                } else {
+                    log('✅ Three.js already loaded', 'success');
+                    checkComplete();
+                }
+                
+                // Load Tone.js
+                if (typeof Tone === 'undefined') {
+                    log('📦 Loading Tone.js...', 'info');
+                    const toneScript = document.createElement('script');
+                    toneScript.src = 'https://unpkg.com/tone@14.7.77/build/Tone.js';
+                    toneScript.onload = () => {
+                        log('✅ Tone.js loaded successfully', 'success');
+                        checkComplete();
+                    };
+                    toneScript.onerror = () => {
+                        log('⚠️ Tone.js failed to load (optional)', 'warning');
+                        // Create a mock Tone object
+                        window.Tone = {
+                            AudioContext: function() { return { resume: () => {} }; },
+                            Analyser: function() { return { connect: () => {}, getByteFrequencyData: () => {} }; }
+                        };
+                        checkComplete();
+                    };
+                    document.head.appendChild(toneScript);
+                } else {
+                    log('✅ Tone.js already loaded', 'success');
+                    checkComplete();
+                }
+                
+                // Load SimplexNoise
+                if (typeof SimplexNoise === 'undefined') {
+                    log('📦 Loading SimplexNoise...', 'info');
+                    const simplexScript = document.createElement('script');
+                    simplexScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js';
+                    simplexScript.onload = () => {
+                        log('✅ SimplexNoise loaded successfully', 'success');
+                        checkComplete();
+                    };
+                    simplexScript.onerror = () => {
+                        log('❌ SimplexNoise failed to load', 'error');
+                        // Create a mock SimplexNoise
+                        window.SimplexNoise = function() {
+                            return {
+                                noise2D: () => Math.random() * 2 - 1,
+                                noise3D: () => Math.random() * 2 - 1,
+                                noise4D: () => Math.random() * 2 - 1
+                            };
+                        };
+                        checkComplete();
+                    };
+                    document.head.appendChild(simplexScript);
+                } else {
+                    log('✅ SimplexNoise already loaded', 'success');
+                    checkComplete();
+                }
+                
+                // Load GSAP
+                if (typeof gsap === 'undefined') {
+                    log('📦 Loading GSAP...', 'info');
+                    const gsapScript = document.createElement('script');
+                    gsapScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js';
+                    gsapScript.onload = () => {
+                        log('✅ GSAP loaded successfully', 'success');
+                        checkComplete();
+                    };
+                    gsapScript.onerror = () => {
+                        log('⚠️ GSAP failed to load (optional)', 'warning');
+                        // Create a mock gsap
+                        window.gsap = {
+                            to: (target, duration, vars) => Promise.resolve(),
+                            from: (target, duration, vars) => Promise.resolve(),
+                            timeline: () => ({ to: () => {}, from: () => {} })
+                        };
+                        checkComplete();
+                    };
+                    document.head.appendChild(gsapScript);
+                } else {
+                    log('✅ GSAP already loaded', 'success');
+                    checkComplete();
+                }
+            });
+        }
+        
+        function loadModules() {
+            return new Promise((resolve) => {
+                const modules = [
+                    'modules/core/EventBus.js',
+                    'modules/core/Config.js',
+                    'modules/core/Utils.js',
+                    'modules/physics/UVO.js',
+                    'modules/physics/UnifiedFormula.js',
+                    'modules/physics/CST.js',
+                    'modules/rendering/Renderer.js',
+                    'modules/rendering/PostProcessor.js',
+                    'modules/rendering/Shaders.js',
+                    'modules/universe/CameraController.js',
+                    'modules/universe/UniverseManager.js',
+                    'modules/universe/InfiniteScaling.js',
+                    'modules/ui/UIManager.js',
+                    'modules/ui/PerformanceMonitor.js',
+                    'modules/ai/AIConsciousness.js',
+                    'modules/ai/ProceduralGenerationEngine.js',
+                    'modules/ai/ObjectLibrary.js',
+                    'modules/sensory/AudioManager.js',
+                    'modules/sensory/SensoryInputManager.js',
+                    'modules/soul-dust/SoulDustParticle.js',
+                    'modules/soul-dust/QuantumEventManager.js',
+                    'modules/controls/PlayerControls.js',
+                    'modules/GenesisEngine.js'
+                ];
+                
+                let loadedCount = 0;
+                const totalModules = modules.length;
+                
+                function checkComplete() {
+                    loadedCount++;
+                    if (loadedCount >= totalModules) {
+                        log('✅ All modules loaded', 'success');
+                        resolve();
+                    }
+                }
+                
+                modules.forEach((module, index) => {
+                    const script = document.createElement('script');
+                    script.src = module;
+                    script.onload = () => {
+                        log(`✅ ${module} loaded`, 'success');
+                        checkComplete();
+                    };
+                    script.onerror = () => {
+                        log(`❌ ${module} failed to load`, 'error');
+                        checkComplete();
+                    };
+                    document.head.appendChild(script);
+                });
+            });
+        }
+        
+        function testDependencies() {
+            log('🔍 Testing dependencies...', 'info');
+            
+            const dependencies = [
+                { name: 'Three.js', global: 'THREE' },
+                { name: 'Tone.js', global: 'Tone' },
+                { name: 'SimplexNoise', global: 'SimplexNoise' },
+                { name: 'GSAP', global: 'gsap' }
+            ];
+            
+            dependencies.forEach(dep => {
+                if (typeof window[dep.global] !== 'undefined') {
+                    log(`✅ ${dep.name}: Available`, 'success');
+                } else {
+                    log(`❌ ${dep.name}: Not available`, 'error');
+                }
+            });
+        }
+        
+        function testEngineInitialization() {
+            log('🚀 Testing GenesisEngine initialization...', 'info');
+            
+            if (!window.GenesisEngine) {
+                log('❌ GenesisEngine: Not available', 'error');
+                return;
+            }
+            
+            log('✅ GenesisEngine: Available', 'success');
+            
+            try {
+                const engine = window.GenesisEngine;
+                
+                if (typeof engine.initialize === 'function') {
+                    log('✅ GenesisEngine.initialize(): Available', 'success');
+                    
+                    engine.initialize().then(() => {
+                        log('✅ GenesisEngine initialization: Completed successfully', 'success');
+                    }).catch((error) => {
+                        log(`❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                    });
+                    
+                } else {
+                    log('❌ GenesisEngine.initialize(): Not available', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ GenesisEngine test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function runAllTests() {
+            log('🧪 Starting robust dependencies test...', 'info');
+            
+            // Step 1: Load dependencies
+            log('Step 1: Loading dependencies...', 'info');
+            await loadDependencies();
+            
+            // Step 2: Load modules
+            log('Step 2: Loading modules...', 'info');
+            await loadModules();
+            
+            // Step 3: Test dependencies
+            log('Step 3: Testing dependencies...', 'info');
+            testDependencies();
+            
+            // Step 4: Test engine initialization
+            log('Step 4: Testing engine initialization...', 'info');
+            setTimeout(testEngineInitialization, 1000);
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            logElement = document.getElementById('log');
+            log('🚀 Robust Dependencies Test loaded', 'success');
+            log('Click "Run All Tests" to test with fallbacks', 'info');
+        });
+    </script>
+</body>
+</html> 

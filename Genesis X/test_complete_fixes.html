@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Fixes Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #00ff00;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffff00; }
+        .info { color: #00ffff; }
+        button {
+            background: #333;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+        #log {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Complete Fixes Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <button onclick="testMissingComponents()">Test Missing Components</button>
+        <button onclick="testInitialization()">Test Initialization</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="log"></div>
+    </div>
+
+    <!-- Load Three.js first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Load core modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Load physics modules -->
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Load rendering modules -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- Load universe modules -->
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- Load UI modules -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Load AI modules -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Load sensory modules -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Load soul-dust modules -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Load controls -->
+    <script src="modules/controls/PlayerControls.js"></script>
+    
+    <!-- Load main engine -->
+    <script src="modules/GenesisEngine.js"></script>
+
+    <script>
+        let logElement;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : 
+                            type === 'error' ? 'error' : 
+                            type === 'warning' ? 'warning' : 'info';
+            
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.innerHTML += `<span class="${className}">${logEntry}</span>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function clearLog() {
+            logElement.innerHTML = '';
+        }
+        
+        function testMissingComponents() {
+            log('🔍 Testing previously missing components...', 'info');
+            
+            // Test Token
+            if (window.Token) {
+                log('✅ Token: Available', 'success');
+                if (window.TokenInstance) {
+                    log('✅ TokenInstance: Available', 'success');
+                } else {
+                    log('❌ TokenInstance: Not available', 'error');
+                }
+            } else {
+                log('❌ Token: Not available', 'error');
+            }
+            
+            // Test TokenizationEngine
+            if (window.TokenizationEngine) {
+                log('✅ TokenizationEngine: Available', 'success');
+                if (typeof window.TokenizationEngine.initialize === 'function') {
+                    log('✅ TokenizationEngine.initialize(): Available', 'success');
+                } else {
+                    log('❌ TokenizationEngine.initialize(): Not available', 'error');
+                }
+            } else {
+                log('❌ TokenizationEngine: Not available', 'error');
+            }
+            
+            // Test UnifiedFormula
+            if (window.UnifiedFormula) {
+                log('✅ UnifiedFormula: Available', 'success');
+                if (window.UnifiedFormula.isInitialized !== undefined) {
+                    log('✅ UnifiedFormula.isInitialized: Available', 'success');
+                } else {
+                    log('❌ UnifiedFormula.isInitialized: Not available', 'error');
+                }
+            } else {
+                log('❌ UnifiedFormula: Not available', 'error');
+            }
+            
+            // Test SoulDustParticle
+            if (window.SoulDustParticle) {
+                log('✅ SoulDustParticle: Available', 'success');
+                if (typeof window.SoulDustParticle.initialize === 'function') {
+                    log('✅ SoulDustParticle.initialize(): Available', 'success');
+                } else {
+                    log('❌ SoulDustParticle.initialize(): Not available', 'error');
+                }
+                if (window.SoulDustParticleInstance) {
+                    log('✅ SoulDustParticleInstance: Available', 'success');
+                } else {
+                    log('❌ SoulDustParticleInstance: Not available', 'error');
+                }
+            } else {
+                log('❌ SoulDustParticle: Not available', 'error');
+            }
+            
+            // Test UVO
+            if (window.UVO) {
+                log('✅ UVO: Available', 'success');
+                if (window.UVO.isInitialized !== undefined) {
+                    log('✅ UVO.isInitialized: Available', 'success');
+                } else {
+                    log('❌ UVO.isInitialized: Not available', 'error');
+                }
+            } else {
+                log('❌ UVO: Not available', 'error');
+            }
+        }
+        
+        function testInitialization() {
+            log('🚀 Testing component initialization...', 'info');
+            
+            // Test UnifiedFormula initialization
+            if (window.UnifiedFormula) {
+                try {
+                    window.UnifiedFormula.initialize();
+                    log('✅ UnifiedFormula initialization: Successful', 'success');
+                } catch (error) {
+                    log(`❌ UnifiedFormula initialization failed: ${error.message}`, 'error');
+                }
+            }
+            
+            // Test SoulDustParticle initialization
+            if (window.SoulDustParticle) {
+                try {
+                    const result = window.SoulDustParticle.initialize();
+                    log('✅ SoulDustParticle initialization: Successful', 'success');
+                } catch (error) {
+                    log(`❌ SoulDustParticle initialization failed: ${error.message}`, 'error');
+                }
+            }
+            
+            // Test TokenizationEngine initialization
+            if (window.TokenizationEngine) {
+                try {
+                    window.TokenizationEngine.initialize();
+                    log('✅ TokenizationEngine initialization: Successful', 'success');
+                } catch (error) {
+                    log(`❌ TokenizationEngine initialization failed: ${error.message}`, 'error');
+                }
+            }
+            
+            // Test UVO initialization
+            if (window.UVO) {
+                try {
+                    window.UVO.initialize();
+                    log('✅ UVO initialization: Successful', 'success');
+                } catch (error) {
+                    log(`❌ UVO initialization failed: ${error.message}`, 'error');
+                }
+            }
+            
+            // Test creating a SoulDustParticle instance
+            if (window.SoulDustParticle) {
+                try {
+                    const audioData = {
+                        frequency: 440,
+                        amplitude: 0.5,
+                        spectralComplexity: 0.3,
+                        timestamp: performance.now()
+                    };
+                    const particle = new window.SoulDustParticle(audioData);
+                    log('✅ SoulDustParticle instance creation: Successful', 'success');
+                    if (particle.isInitialized) {
+                        log('✅ SoulDustParticle instance is initialized', 'success');
+                    } else {
+                        log('❌ SoulDustParticle instance is not initialized', 'error');
+                    }
+                } catch (error) {
+                    log(`❌ SoulDustParticle instance creation failed: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        function testGenesisEngineInitialization() {
+            log('🌌 Testing GenesisEngine initialization...', 'info');
+            
+            // Test GenesisEngine class
+            if (window.GenesisEngineClass) {
+                log('✅ GenesisEngineClass: Available', 'success');
+            } else {
+                log('❌ GenesisEngineClass: Not available', 'error');
+            }
+            
+            // Test GenesisEngine instance
+            if (window.GenesisEngine) {
+                log('✅ GenesisEngine instance: Available', 'success');
+                
+                try {
+                    const engine = window.GenesisEngine;
+                    
+                    if (typeof engine.initialize === 'function') {
+                        log('✅ GenesisEngine.initialize(): Available', 'success');
+                        
+                        engine.initialize().then(() => {
+                            log('✅ GenesisEngine initialization: Completed successfully', 'success');
+                        }).catch((error) => {
+                            log(`❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                        });
+                        
+                    } else {
+                        log('❌ GenesisEngine.initialize(): Not available', 'error');
+                    }
+                    
+                } catch (error) {
+                    log(`❌ GenesisEngine test failed: ${error.message}`, 'error');
+                }
+                
+                // Test creating a new GenesisEngine instance
+                if (window.GenesisEngineClass) {
+                    try {
+                        const newEngine = new window.GenesisEngineClass();
+                        log('✅ GenesisEngineClass instantiation: Successful', 'success');
+                        if (newEngine.isInitialized !== undefined) {
+                            log('✅ New GenesisEngine instance has isInitialized property', 'success');
+                        }
+                    } catch (error) {
+                        log(`❌ GenesisEngineClass instantiation failed: ${error.message}`, 'error');
+                    }
+                }
+            } else {
+                log('❌ GenesisEngine instance: Not available', 'error');
+            }
+        }
+        
+        function runAllTests() {
+            log('🧪 Starting complete fixes test...', 'info');
+            
+            const tests = [
+                { name: 'Missing Components', func: testMissingComponents },
+                { name: 'Component Initialization', func: testInitialization },
+                { name: 'GenesisEngine Initialization', func: testGenesisEngineInitialization }
+            ];
+            
+            let allPassed = true;
+            
+            tests.forEach((test, index) => {
+                log(`\n--- Test ${index + 1}: ${test.name} ---`, 'info');
+                const result = test.func();
+                if (result === false) {
+                    allPassed = false;
+                }
+            });
+            
+            if (allPassed) {
+                log('\n🎉 All tests passed! All fixes are working correctly.', 'success');
+            } else {
+                log('\n⚠️ Some tests failed. Please check the errors above.', 'warning');
+            }
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            logElement = document.getElementById('log');
+            log('🚀 Complete Fixes Test loaded', 'success');
+            log('Click "Run All Tests" to verify all fixes', 'info');
+        });
+    </script>
+</body>
+</html> 

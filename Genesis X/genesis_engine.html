@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Engine - The Living Cosmos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .ui-window {
+            position: absolute;
+            background: rgba(0, 20, 40, 0.95);
+            border: 1px solid #00aaff;
+            border-radius: 8px;
+            padding: 15px;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+            min-width: 300px;
+            max-width: 500px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .ui-window h3 {
+            color: #00aaff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #00aaff;
+            padding-bottom: 8px;
+        }
+
+        .ui-window p {
+            font-size: 12px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .ui-window button {
+            background: linear-gradient(45deg, #00aaff, #0088cc);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .ui-window button:hover {
+            background: linear-gradient(45deg, #0088cc, #006699);
+            transform: translateY(-1px);
+        }
+
+        .ui-window input, .ui-window select {
+            background: rgba(0, 40, 80, 0.8);
+            border: 1px solid #00aaff;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin: 5px;
+            font-size: 12px;
+        }
+
+        .ui-window input:focus, .ui-window select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Tab System */
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #00aaff;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            background: rgba(0, 40, 80, 0.8);
+            border: 1px solid #00aaff;
+            border-bottom: none;
+            color: #00aaff;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border-radius: 4px 4px 0 0;
+            margin-right: 2px;
+        }
+
+        .tab.active {
+            background: #00aaff;
+            color: #000;
+        }
+
+        .tab:hover {
+            background: rgba(0, 170, 255, 0.8);
+            color: #000;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Main UI Window */
+        #main-ui-window {
+            top: 20px;
+            left: 20px;
+            width: 400px;
+            height: 500px;
+        }
+
+        .draggable {
+            cursor: move;
+        }
+
+        .draggable:hover {
+            background: rgba(0, 30, 60, 0.95);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .status-inactive {
+            background: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .status-processing {
+            background: #ffff00;
+            box-shadow: 0 0 10px #ffff00;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #000, #001122, #000);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        #loading-screen h1 {
+            color: #00aaff;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00aaff;
+        }
+
+        #loading-screen p {
+            color: #ffffff;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .loading-bar {
+            width: 400px;
+            height: 4px;
+            background: rgba(0, 170, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00aaff, #00ffff);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00aaff;
+        }
+
+        #performance-monitor {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <h1>Genesis Engine</h1>
+        <p>Initializing the Living Cosmos...</p>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loading-progress"></div>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="genesis-canvas"></canvas>
+        
+        <div id="ui-overlay">
+            <div id="main-ui-window" class="ui-window draggable">
+                <div class="tab-container">
+                    <div class="tab active" data-tab="controls">🎮 Controls</div>
+                    <div class="tab" data-tab="performance">📊 Performance</div>
+                    <div class="tab" data-tab="universe">🌌 Universe</div>
+                    <div class="tab" data-tab="soul-dust">✨ Soul Dust</div>
+                    <div class="tab" data-tab="ai">🧠 AI</div>
+                </div>
+
+                <!-- Controls Tab -->
+                <div id="controls-tab" class="tab-content active">
+                    <h3>🎮 Controls</h3>
+                    <p><strong>Camera Modes:</strong></p>
+                    <button onclick="window.UIManager.setCameraMode('orbit')">Orbit (O)</button>
+                    <button onclick="window.UIManager.setCameraMode('first-person')">First-Person (F)</button>
+                    <button onclick="window.UIManager.setCameraMode('cinematic')">Cinematic (C)</button>
+                    <br><br>
+                    <p><strong>Actions:</strong></p>
+                    <button onclick="window.UIManager.resetView()">Reset View</button>
+                    <button onclick="window.UIManager.clearSoulDust()">Clear Soul Dust</button>
+                    <button onclick="window.UIManager.boostEnergy()">Boost Energy</button>
+                    <br><br>
+                    <p><strong>AI Controls:</strong></p>
+                    <button onclick="window.UIManager.toggleAICreation()">Toggle AI Creation</button>
+                    <button onclick="window.UIManager.toggleLearning()">Toggle Learning</button>
+                    <button onclick="window.UIManager.forceCreation()">Force Creation</button>
+                </div>
+
+                <!-- Performance Tab -->
+                <div id="performance-tab" class="tab-content">
+                    <h3>📊 Performance</h3>
+                    <p><strong>FPS:</strong> <span id="fps-display">0</span></p>
+                    <p><strong>Frame Time:</strong> <span id="frame-time-display">0ms</span></p>
+                    <p><strong>Memory:</strong> <span id="memory-display">0MB</span></p>
+                    <p><strong>Draw Calls:</strong> <span id="draw-calls-display">0</span></p>
+                    <p><strong>Triangles:</strong> <span id="triangles-display">0</span></p>
+                    <br>
+                    <button onclick="window.UIManager.togglePerformanceMode()">Toggle Performance Mode</button>
+                </div>
+
+                <!-- Universe Tab -->
+                <div id="universe-tab" class="tab-content">
+                    <h3>🌌 Universe</h3>
+                    <p><strong>Sectors:</strong> <span id="sectors-display">0</span></p>
+                    <p><strong>Active Sectors:</strong> <span id="active-sectors-display">0</span></p>
+                    <p><strong>Total Objects:</strong> <span id="total-objects-display">0</span></p>
+                    <p><strong>Universe Age:</strong> <span id="universe-age-display">0s</span></p>
+                    <p><strong>Generation Queue:</strong> <span id="generation-queue-display">0</span></p>
+                    <br>
+                    <button onclick="window.UIManager.regenerateUniverse()">Regenerate Universe</button>
+                </div>
+
+                <!-- Soul Dust Tab -->
+                <div id="soul-dust-tab" class="tab-content">
+                    <h3>✨ Soul Dust</h3>
+                    <p><strong>Particles:</strong> <span id="soul-dust-count">0</span></p>
+                    <p><strong>Total Energy:</strong> <span id="soul-dust-energy">0</span></p>
+                    <p><strong>Average Frequency:</strong> <span id="soul-dust-frequency">0Hz</span></p>
+                    <p><strong>Quantum Brain:</strong> <span id="quantum-brain-status">Inactive</span></p>
+                    <br>
+                    <button onclick="window.UIManager.clearSoulDust()">Clear All</button>
+                    <button onclick="window.UIManager.boostSoulDust()">Boost Energy</button>
+                </div>
+
+                <!-- AI Tab -->
+                <div id="ai-tab" class="tab-content">
+                    <h3>🧠 AI Consciousness</h3>
+                    <p><strong>Learning:</strong> <span id="ai-learning-status">Active</span></p>
+                    <p><strong>Creation:</strong> <span id="ai-creation-status">Active</span></p>
+                    <p><strong>Creation Count:</strong> <span id="ai-creation-count">0</span></p>
+                    <p><strong>Last Creation:</strong> <span id="ai-last-creation">Never</span></p>
+                    <br>
+                    <button onclick="window.UIManager.toggleAICreation()">Toggle Creation</button>
+                    <button onclick="window.UIManager.toggleLearning()">Toggle Learning</button>
+                    <button onclick="window.UIManager.forceCreation()">Force Creation</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="performance-monitor">
+            <div>FPS: <span id="fps">0</span></div>
+            <div>Draw Calls: <span id="draw-calls">0</span></div>
+            <div>Triangles: <span id="triangles">0</span></div>
+        </div>
+    </div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Fallback for missing dependencies -->
+    <script>
+        // Create fallbacks for missing dependencies
+        if (typeof Tone === 'undefined') {
+            console.warn('⚠️ Tone.js not loaded, creating fallback');
+            window.Tone = {
+                AudioContext: function() { return { resume: () => {} }; },
+                Analyser: function() { return { connect: () => {}, getByteFrequencyData: () => {} }; }
+            };
+        }
+        
+        if (typeof SimplexNoise === 'undefined') {
+            console.warn('⚠️ SimplexNoise not loaded, creating fallback');
+            window.SimplexNoise = function() {
+                return {
+                    noise2D: () => Math.random() * 2 - 1,
+                    noise3D: () => Math.random() * 2 - 1,
+                    noise4D: () => Math.random() * 2 - 1
+                };
+            };
+        }
+        
+        if (typeof gsap === 'undefined') {
+            console.warn('⚠️ GSAP not loaded, creating fallback');
+            window.gsap = {
+                to: (target, duration, vars) => Promise.resolve(),
+                from: (target, duration, vars) => Promise.resolve(),
+                timeline: () => ({ to: () => {}, from: () => {} })
+            };
+        }
+    </script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Sensory Input (Formula of Creation) -->
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Rendering -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- AI and Creation -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Universe Management -->
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- Controls -->
+    <script src="modules/controls/PlayerControls.js"></script>
+    
+    <!-- UI and Controls -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+    <script src="init_components.js"></script>
+    <script src="main.js"></script>
+
+    <script>
+        // Tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(targetTab + '-tab').classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>  

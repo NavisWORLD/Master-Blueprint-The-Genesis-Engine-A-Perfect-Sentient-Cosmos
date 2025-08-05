@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Controller Fix Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #00ff00;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffff00; }
+        .info { color: #00ffff; }
+        button {
+            background: #333;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+        #log {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Camera Controller Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <button onclick="forceRefresh()">Force Refresh Page</button>
+        <button onclick="checkScriptLoading()">Check Script Loading</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="log"></div>
+    </div>
+
+    <!-- Load Three.js first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Load core modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    
+    <!-- Load physics modules -->
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Load rendering modules -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- Load universe modules -->
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- Load UI modules -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Load AI modules -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Load sensory modules -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Load soul-dust modules -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Load controls -->
+    <script src="modules/controls/PlayerControls.js"></script>
+    
+    <!-- Load main engine -->
+    <script src="modules/GenesisEngine.js"></script>
+
+    <script>
+        let logElement;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : 
+                            type === 'error' ? 'error' : 
+                            type === 'warning' ? 'warning' : 'info';
+            
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.innerHTML += `<span class="${className}">${logEntry}</span>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function clearLog() {
+            logElement.innerHTML = '';
+        }
+        
+        function forceRefresh() {
+            log('🔄 Forcing page refresh...', 'warning');
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1000);
+        }
+        
+        function checkScriptLoading() {
+            log('📋 Checking script loading status...', 'info');
+            
+            const scripts = [
+                'EventBus', 'Config', 'Utils',
+                'UVO', 'UnifiedFormula', 'CST',
+                'Renderer', 'PostProcessor', 'Shaders',
+                'CameraController', 'UniverseManager', 'InfiniteScaling',
+                'UIManager', 'PerformanceMonitor',
+                'AIConsciousness', 'ProceduralGenerationEngine', 'ObjectLibrary',
+                'AudioManager', 'SensoryInputManager',
+                'SoulDustParticle', 'QuantumEventManager',
+                'PlayerControls', 'GenesisEngine'
+            ];
+            
+            scripts.forEach(script => {
+                if (window[script]) {
+                    log(`✅ ${script}: Loaded`, 'success');
+                } else {
+                    log(`❌ ${script}: Not loaded`, 'error');
+                }
+            });
+        }
+        
+        function testCameraControllerAvailability() {
+            log('🔍 Testing CameraController availability...', 'info');
+            
+            // Test 1: Check if CameraController instance exists
+            if (window.CameraController) {
+                log('✅ CameraController instance: Available', 'success');
+            } else {
+                log('❌ CameraController instance: Not available', 'error');
+                return false;
+            }
+            
+            // Test 2: Check if CameraControllerClass exists
+            if (window.CameraControllerClass) {
+                log('✅ CameraControllerClass: Available', 'success');
+            } else {
+                log('❌ CameraControllerClass: Not available', 'error');
+                return false;
+            }
+            
+            // Test 3: Check if instance is not a constructor
+            try {
+                const testInstance = new window.CameraController();
+                log('⚠️ CameraController instance is a constructor (this is wrong)', 'warning');
+                return false;
+            } catch (error) {
+                log('✅ CameraController instance is not a constructor (correct)', 'success');
+            }
+            
+            // Test 4: Check if class is a constructor
+            try {
+                const testClass = new window.CameraControllerClass(null);
+                log('✅ CameraControllerClass is a constructor (correct)', 'success');
+            } catch (error) {
+                log('❌ CameraControllerClass is not a constructor', 'error');
+                return false;
+            }
+            
+            // Test 5: Check instance methods
+            if (typeof window.CameraController.initialize === 'function') {
+                log('✅ CameraController.initialize(): Available', 'success');
+            } else {
+                log('❌ CameraController.initialize(): Not available', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function testGenesisEngineInitialization() {
+            log('🚀 Testing GenesisEngine initialization...', 'info');
+            
+            if (!window.GenesisEngine) {
+                log('❌ GenesisEngine: Not available', 'error');
+                return false;
+            }
+            
+            log('✅ GenesisEngine: Available', 'success');
+            
+            // Test if GenesisEngine can access CameraController
+            try {
+                const engine = window.GenesisEngine;
+                log('✅ GenesisEngine instance: Retrieved', 'success');
+                
+                // Test the specific line that was causing the error
+                if (window.CameraController) {
+                    const camera = window.CameraController;
+                    log('✅ GenesisEngine can access CameraController instance', 'success');
+                } else {
+                    log('❌ GenesisEngine cannot access CameraController instance', 'error');
+                    return false;
+                }
+                
+            } catch (error) {
+                log(`❌ GenesisEngine test failed: ${error.message}`, 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function testFullInitialization() {
+            log('🌌 Testing full GenesisEngine initialization...', 'info');
+            
+            if (!window.GenesisEngine) {
+                log('❌ GenesisEngine not available for full test', 'error');
+                return false;
+            }
+            
+            try {
+                const engine = window.GenesisEngine;
+                
+                // Test initialization
+                engine.initialize().then(() => {
+                    log('✅ GenesisEngine initialization completed successfully', 'success');
+                }).catch((error) => {
+                    log(`❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                });
+                
+            } catch (error) {
+                log(`❌ Full initialization test failed: ${error.message}`, 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function runAllTests() {
+            log('🧪 Starting comprehensive CameraController fix test...', 'info');
+            
+            const tests = [
+                { name: 'CameraController Availability', func: testCameraControllerAvailability },
+                { name: 'GenesisEngine Access', func: testGenesisEngineInitialization },
+                { name: 'Full Initialization', func: testFullInitialization }
+            ];
+            
+            let allPassed = true;
+            
+            tests.forEach((test, index) => {
+                log(`\n--- Test ${index + 1}: ${test.name} ---`, 'info');
+                const result = test.func();
+                if (!result) {
+                    allPassed = false;
+                }
+            });
+            
+            if (allPassed) {
+                log('\n🎉 All tests passed! CameraController fix is working correctly.', 'success');
+            } else {
+                log('\n⚠️ Some tests failed. Please check the errors above.', 'warning');
+            }
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            logElement = document.getElementById('log');
+            log('🚀 Camera Controller Fix Test loaded', 'success');
+            log('Click "Run All Tests" to verify the fix', 'info');
+        });
+    </script>
+</body>
+</html> 

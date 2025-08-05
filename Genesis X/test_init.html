@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Engine - Initialization Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+        }
+        #test-results {
+            background: #111;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .info { color: #ffff00; }
+    </style>
+</head>
+<body>
+    <h1>Genesis Engine - Initialization Test</h1>
+    <div id="test-results">
+        <p>Testing initialization...</p>
+    </div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Audio and Sensory -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Rendering -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- AI and Creation -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Universe Management -->
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- UI and Controls -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+
+    <script>
+        async function testInitialization() {
+            const results = document.getElementById('test-results');
+            
+            function addResult(message, type = 'info') {
+                const p = document.createElement('p');
+                p.className = type;
+                p.textContent = message;
+                results.appendChild(p);
+            }
+            
+            try {
+                addResult('🔍 Testing Genesis Engine initialization...', 'info');
+                
+                // Test 1: Check if core modules are loaded
+                if (window.EventBus && window.Config && window.Utils) {
+                    addResult('✅ Core modules loaded successfully', 'success');
+                } else {
+                    addResult('❌ Core modules failed to load', 'error');
+                    return;
+                }
+                
+                // Test 1.5: Check if Config.get method is available
+                if (window.Config && typeof window.Config.get === 'function') {
+                    addResult('✅ Config.get method is available', 'success');
+                } else {
+                    addResult('❌ Config.get method is not available', 'error');
+                    return;
+                }
+                
+                // Test 1.6: Check if Utils.getConfig method is available
+                if (window.Utils && typeof window.Utils.getConfig === 'function') {
+                    addResult('✅ Utils.getConfig method is available', 'success');
+                } else {
+                    addResult('❌ Utils.getConfig method is not available', 'error');
+                    return;
+                }
+                
+                // Test 2: Check WebGL support
+                if (window.Utils.isWebGLSupported()) {
+                    addResult('✅ WebGL is supported', 'success');
+                } else {
+                    addResult('❌ WebGL is not supported', 'error');
+                    return;
+                }
+                
+                // Test 3: Check Web Audio support
+                if (window.Utils.isWebAudioSupported()) {
+                    addResult('✅ Web Audio API is supported', 'success');
+                } else {
+                    addResult('⚠️ Web Audio API is not supported (audio features will be disabled)', 'info');
+                }
+                
+                // Test 4: Create Genesis Engine instance
+                addResult('🚀 Creating Genesis Engine instance...', 'info');
+                const genesisEngine = new GenesisEngine();
+                addResult('✅ Genesis Engine instance created', 'success');
+                
+                // Test 5: Initialize Genesis Engine
+                addResult('🌌 Initializing Genesis Engine...', 'info');
+                try {
+                    await genesisEngine.initialize();
+                    addResult('✅ Genesis Engine initialized successfully!', 'success');
+                } catch (error) {
+                    addResult(`❌ Genesis Engine initialization failed: ${error.message}`, 'error');
+                    console.error('Detailed error:', error);
+                    return;
+                }
+                
+                // Test 6: Check engine state
+                if (genesisEngine.isInitialized) {
+                    addResult('✅ Engine is properly initialized', 'success');
+                } else {
+                    addResult('❌ Engine initialization flag is false', 'error');
+                }
+                
+                // Test 7: Get engine stats
+                const stats = genesisEngine.getStats();
+                addResult(`📊 Engine stats: ${JSON.stringify(stats, null, 2)}`, 'info');
+                
+                addResult('🎉 All tests passed! The Genesis Engine is ready.', 'success');
+                
+            } catch (error) {
+                addResult(`❌ Initialization failed: ${error.message}`, 'error');
+                console.error('Initialization error:', error);
+            }
+        }
+        
+        // Run the test when the page loads
+        document.addEventListener('DOMContentLoaded', testInitialization);
+    </script>
+</body>
+</html> 

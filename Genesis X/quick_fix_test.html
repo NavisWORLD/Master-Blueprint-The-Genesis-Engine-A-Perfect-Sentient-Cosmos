@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            margin: 20px;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .info { color: #00aaff; }
+    </style>
+</head>
+<body>
+    <h1>Quick Fix Test</h1>
+    <div id="results"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            console.log(message);
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        log('🔍 Testing fixes...');
+    </script>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+
+    <script>
+        log('🔍 All scripts loaded, testing fixes...');
+        
+        // Test 1: Check TokenizationEngine
+        log('📋 Test 1: Checking TokenizationEngine...');
+        if (window.TokenizationEngine) {
+            log('✅ TokenizationEngine is available', 'success');
+            
+            // Test initialization
+            try {
+                window.TokenizationEngine.initialize();
+                log('✅ TokenizationEngine initialized successfully', 'success');
+            } catch (error) {
+                log(`❌ TokenizationEngine initialization failed: ${error.message}`, 'error');
+            }
+        } else {
+            log('❌ TokenizationEngine is not available', 'error');
+        }
+        
+        // Test 2: Check SoulDustParticle creation
+        log('📋 Test 2: Checking SoulDustParticle creation...');
+        try {
+            const testAudioData = {
+                frequency: 440,
+                amplitude: 0.5,
+                spectralComplexity: 0.3,
+                timestamp: performance.now()
+            };
+            const testParticle = new window.SoulDustParticle(testAudioData);
+            log('✅ SoulDustParticle created successfully', 'success');
+            log(`   ID: ${testParticle.id}`, 'info');
+            log(`   Position: ${testParticle.position.x.toFixed(2)}, ${testParticle.position.y.toFixed(2)}, ${testParticle.position.z.toFixed(2)}`, 'info');
+        } catch (error) {
+            log(`❌ SoulDustParticle creation failed: ${error.message}`, 'error');
+        }
+        
+        // Test 3: Check GenesisEngine creation
+        log('📋 Test 3: Checking GenesisEngine creation...');
+        try {
+            const engine = window.GenesisEngine;
+            log('✅ GenesisEngine instance created', 'success');
+            
+            // Test initialization
+            log('🔄 Testing GenesisEngine initialization...');
+            engine.initialize().then(() => {
+                log('✅ GenesisEngine initialized successfully', 'success');
+                log('🎉 All fixes are working!', 'success');
+            }).catch(error => {
+                log(`❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+            });
+            
+        } catch (error) {
+            log(`❌ GenesisEngine creation failed: ${error.message}`, 'error');
+        }
+        
+    </script>
+</body>
+</html> 

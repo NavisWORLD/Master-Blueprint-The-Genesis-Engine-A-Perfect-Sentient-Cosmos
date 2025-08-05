@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utils Initialization Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #0a5; }
+        .error { background: #a05; }
+        .warning { background: #a50; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Utils Initialization Test</h1>
+    <div id="results"></div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+
+    <script>
+        function addResult(message, type = 'success') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        function testUtilsInitialization() {
+            console.log('🧪 Testing Utils initialization...');
+            addResult('🧪 Testing Utils initialization...');
+
+            // Test 1: Check if Utils is available
+            if (window.Utils) {
+                addResult('✅ Utils is available');
+                console.log('✅ Utils is available');
+            } else {
+                addResult('❌ Utils is not available', 'error');
+                console.error('❌ Utils is not available');
+                return;
+            }
+
+            // Test 2: Check if Utils is initialized
+            if (window.Utils.isInitialized) {
+                addResult('✅ Utils is initialized');
+                console.log('✅ Utils is initialized');
+            } else {
+                addResult('❌ Utils is not initialized', 'error');
+                console.error('❌ Utils is not initialized');
+                return;
+            }
+
+            // Test 3: Check all required methods
+            const requiredMethods = [
+                'generateUUID',
+                'frequencyToRGB',
+                'randomPointInSphere',
+                'randomPointOnSphere',
+                'getConfig',
+                'clamp',
+                'map',
+                'random',
+                'isWebGLSupported',
+                'isWebAudioSupported'
+            ];
+
+            let allMethodsAvailable = true;
+            for (const method of requiredMethods) {
+                if (typeof window.Utils[method] === 'function') {
+                    addResult(`✅ ${method} method is available`);
+                    console.log(`✅ ${method} method is available`);
+                } else {
+                    addResult(`❌ ${method} method is not available`, 'error');
+                    console.error(`❌ ${method} method is not available`);
+                    allMethodsAvailable = false;
+                }
+            }
+
+            // Test 4: Test method functionality
+            if (allMethodsAvailable) {
+                try {
+                    // Test generateUUID
+                    const uuid = window.Utils.generateUUID();
+                    addResult(`✅ generateUUID works: ${uuid.substring(0, 20)}...`);
+
+                    // Test randomPointInSphere
+                    const point = window.Utils.randomPointInSphere(10);
+                    if (point && typeof point.x === 'number' && typeof point.y === 'number' && typeof point.z === 'number') {
+                        addResult(`✅ randomPointInSphere works: x=${point.x.toFixed(2)}, y=${point.y.toFixed(2)}, z=${point.z.toFixed(2)}`);
+                    } else {
+                        addResult('❌ randomPointInSphere returned invalid result', 'error');
+                    }
+
+                    // Test getConfig
+                    const config = window.Utils.getConfig('test.value', 'default');
+                    addResult(`✅ getConfig works: ${config}`);
+
+                    // Test clamp
+                    const clamped = window.Utils.clamp(15, 0, 10);
+                    addResult(`✅ clamp works: ${clamped}`);
+
+                    // Test map
+                    const mapped = window.Utils.map(5, 0, 10, 0, 100);
+                    addResult(`✅ map works: ${mapped}`);
+
+                    // Test random
+                    const random = window.Utils.random(0, 1);
+                    addResult(`✅ random works: ${random.toFixed(3)}`);
+
+                    addResult('🎉 All Utils tests passed!', 'success');
+                    console.log('🎉 All Utils tests passed!');
+
+                } catch (error) {
+                    addResult(`❌ Method test failed: ${error.message}`, 'error');
+                    console.error('❌ Method test failed:', error);
+                }
+            } else {
+                addResult('❌ Some required methods are missing', 'error');
+                console.error('❌ Some required methods are missing');
+            }
+        }
+
+        // Run test after a short delay to ensure all scripts are loaded
+        setTimeout(testUtilsInitialization, 1000);
+    </script>
+</body>
+</html> 

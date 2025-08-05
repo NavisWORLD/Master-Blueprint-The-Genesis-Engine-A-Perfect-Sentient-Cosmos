@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIManager Test</title>
+</head>
+<body>
+    <h1>UIManager Test</h1>
+    <div id="results"></div>
+
+    <script>
+        function log(message) {
+            console.log(message);
+            document.getElementById('results').innerHTML += '<p>' + message + '</p>';
+        }
+
+        log('🔍 Testing UIManager loading...');
+
+        // Test if UIManager.js loads without errors
+        try {
+            // Load UIManager.js
+            const script = document.createElement('script');
+            script.src = 'modules/ui/UIManager.js';
+            script.onload = function() {
+                log('✅ UIManager.js loaded successfully');
+                
+                // Check if global instance was created
+                setTimeout(() => {
+                    log('🔍 Checking window.UIManager...');
+                    log('window.UIManager exists: ' + (typeof window.UIManager !== 'undefined'));
+                    
+                    if (typeof window.UIManager !== 'undefined') {
+                        log('✅ window.UIManager is available');
+                        log('UIManager type: ' + typeof window.UIManager);
+                        log('UIManager constructor: ' + window.UIManager.constructor.name);
+                        log('UIManager initialize method: ' + typeof window.UIManager.initialize);
+                        
+                        // Test initialization
+                        try {
+                            window.UIManager.initialize();
+                            log('✅ UIManager.initialize() called successfully');
+                        } catch (error) {
+                            log('❌ UIManager.initialize() failed: ' + error.message);
+                        }
+                    } else {
+                        log('❌ window.UIManager is NOT available');
+                    }
+                }, 100);
+            };
+            script.onerror = function() {
+                log('❌ Failed to load UIManager.js');
+            };
+            document.head.appendChild(script);
+        } catch (error) {
+            log('❌ Error loading UIManager.js: ' + error.message);
+        }
+    </script>
+</body>
+</html> 

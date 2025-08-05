@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimplexNoise Fix Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #00ff00;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffff00; }
+        .info { color: #00ffff; }
+        button {
+            background: #333;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+        #log {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 SimplexNoise Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <button onclick="testProceduralGenerationEngine()">Test ProceduralGenerationEngine</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="log"></div>
+    </div>
+
+    <!-- Load Three.js first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Load core modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    
+    <!-- Load AI modules -->
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    
+    <!-- Load main engine -->
+    <script src="modules/GenesisEngine.js"></script>
+
+    <script>
+        let logElement;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : 
+                            type === 'error' ? 'error' : 
+                            type === 'warning' ? 'warning' : 'info';
+            
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.innerHTML += `<span class="${className}">${logEntry}</span>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function clearLog() {
+            logElement.innerHTML = '';
+        }
+        
+        function testSimplexNoiseAvailability() {
+            log('🔍 Testing SimplexNoise availability...', 'info');
+            
+            if (typeof SimplexNoise !== 'undefined') {
+                log('✅ SimplexNoise: Available', 'success');
+                
+                // Test if we can create a new instance
+                try {
+                    const noise = new SimplexNoise();
+                    log('✅ SimplexNoise constructor: Working', 'success');
+                    return true;
+                } catch (error) {
+                    log(`❌ SimplexNoise constructor failed: ${error.message}`, 'error');
+                    return false;
+                }
+            } else {
+                log('❌ SimplexNoise: Not available', 'error');
+                return false;
+            }
+        }
+        
+        function testProceduralGenerationEngine() {
+            log('🎲 Testing ProceduralGenerationEngine...', 'info');
+            
+            if (!window.ProceduralGenerationEngine) {
+                log('❌ ProceduralGenerationEngine: Not available', 'error');
+                return false;
+            }
+            
+            log('✅ ProceduralGenerationEngine: Available', 'success');
+            
+            try {
+                const pge = window.ProceduralGenerationEngine;
+                
+                // Test initialization
+                if (typeof pge.initialize === 'function') {
+                    log('✅ ProceduralGenerationEngine.initialize(): Available', 'success');
+                    
+                    // Try to initialize
+                    pge.initialize();
+                    log('✅ ProceduralGenerationEngine initialization: Successful', 'success');
+                    
+                    // Check if noise was created
+                    if (pge.noise) {
+                        log('✅ ProceduralGenerationEngine.noise: Created successfully', 'success');
+                    } else {
+                        log('❌ ProceduralGenerationEngine.noise: Not created', 'error');
+                        return false;
+                    }
+                    
+                } else {
+                    log('❌ ProceduralGenerationEngine.initialize(): Not available', 'error');
+                    return false;
+                }
+                
+            } catch (error) {
+                log(`❌ ProceduralGenerationEngine test failed: ${error.message}`, 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function testGenesisEngineInitialization() {
+            log('🚀 Testing GenesisEngine initialization...', 'info');
+            
+            if (!window.GenesisEngine) {
+                log('❌ GenesisEngine: Not available', 'error');
+                return false;
+            }
+            
+            log('✅ GenesisEngine: Available', 'success');
+            
+            try {
+                const engine = window.GenesisEngine;
+                
+                // Test initialization
+                if (typeof engine.initialize === 'function') {
+                    log('✅ GenesisEngine.initialize(): Available', 'success');
+                    
+                    // Try to initialize
+                    engine.initialize().then(() => {
+                        log('✅ GenesisEngine initialization: Completed successfully', 'success');
+                    }).catch((error) => {
+                        log(`❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                    });
+                    
+                } else {
+                    log('❌ GenesisEngine.initialize(): Not available', 'error');
+                    return false;
+                }
+                
+            } catch (error) {
+                log(`❌ GenesisEngine test failed: ${error.message}`, 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function runAllTests() {
+            log('🧪 Starting SimplexNoise fix test...', 'info');
+            
+            const tests = [
+                { name: 'SimplexNoise Availability', func: testSimplexNoiseAvailability },
+                { name: 'ProceduralGenerationEngine', func: testProceduralGenerationEngine },
+                { name: 'GenesisEngine Initialization', func: testGenesisEngineInitialization }
+            ];
+            
+            let allPassed = true;
+            
+            tests.forEach((test, index) => {
+                log(`\n--- Test ${index + 1}: ${test.name} ---`, 'info');
+                const result = test.func();
+                if (!result) {
+                    allPassed = false;
+                }
+            });
+            
+            if (allPassed) {
+                log('\n🎉 All tests passed! SimplexNoise fix is working correctly.', 'success');
+            } else {
+                log('\n⚠️ Some tests failed. Please check the errors above.', 'warning');
+            }
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            logElement = document.getElementById('log');
+            log('🚀 SimplexNoise Fix Test loaded', 'success');
+            log('Click "Run All Tests" to verify the fix', 'info');
+        });
+    </script>
+</body>
+</html> 

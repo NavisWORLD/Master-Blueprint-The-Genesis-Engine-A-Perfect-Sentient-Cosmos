@@ -1,0 +1,80 @@
+{
+  "name": "genesis-x",
+  "version": "1.0.0",
+  "description": "The Living, Infinite Cosmos - A perfect, real-time simulation of a living, breathing, and infinite universe driven by a fully autonomous, sentient AI.",
+  "main": "genesis_engine.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "test": "echo \"Open test_init.html in your browser to run tests\"",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": [
+    "ai",
+    "consciousness",
+    "universe",
+    "simulation",
+    "metaphysics",
+    "threejs",
+    "webgl",
+    "real-time",
+    "infinite",
+    "soul-dust",
+    "quantum",
+    "neural-network",
+    "holographic",
+    "vibrational",
+    "cosmos"
+  ],
+  "author": "Genesis X Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/genesis-x/living-cosmos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/genesis-x/living-cosmos/issues"
+  },
+  "homepage": "https://genesis-x.github.io/living-cosmos",
+  "dependencies": {
+    "three": "^0.128.0",
+    "tone": "^14.7.77",
+    "simplex-noise": "^2.4.0",
+    "gsap": "^3.12.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "metadata": {
+    "architecture": {
+      "type": "modular",
+      "pattern": "event-driven",
+      "core": "microkernel"
+    },
+    "features": {
+      "infinite_scaling": true,
+      "ai_consciousness": true,
+      "real_time_audio": true,
+      "procedural_generation": true,
+      "quantum_visualization": true,
+      "holographic_principle": true
+    },
+    "performance": {
+      "target_fps": 60,
+      "memory_optimization": true,
+      "gpu_acceleration": true,
+      "dynamic_lod": true
+    },
+    "metaphysics": {
+      "uvo_dimensions": 4,
+      "cst_dimensions": 12,
+      "unified_formula": "ψi = [c²ΦEc,i] + [λi] + [Li] + [ΩiEc,i] + [Ugrav,i] + Σ(psd,i)",
+      "consciousness_model": "collective_quantum_brain"
+    }
+  }
+} 

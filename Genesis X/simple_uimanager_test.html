@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple UIManager Test</title>
+</head>
+<body>
+    <h1>Simple UIManager Test</h1>
+    <div id="results"></div>
+
+    <script>
+        function log(message) {
+            console.log(message);
+            document.getElementById('results').innerHTML += '<p>' + message + '</p>';
+        }
+
+        log('🔍 Starting simple UIManager test...');
+        log('Before loading UIManager.js: window.UIManager = ' + (typeof window.UIManager));
+    </script>
+
+    <script src="modules/ui/UIManager.js"></script>
+
+    <script>
+        log('After loading UIManager.js: window.UIManager = ' + (typeof window.UIManager));
+        
+        if (typeof window.UIManager !== 'undefined') {
+            log('✅ UIManager is available!');
+            log('UIManager type: ' + typeof window.UIManager);
+            log('UIManager constructor: ' + window.UIManager.constructor.name);
+            log('UIManager initialize method: ' + typeof window.UIManager.initialize);
+            
+            try {
+                window.UIManager.initialize();
+                log('✅ UIManager.initialize() called successfully!');
+            } catch (error) {
+                log('❌ UIManager.initialize() failed: ' + error.message);
+            }
+        } else {
+            log('❌ UIManager is NOT available!');
+        }
+    </script>
+</body>
+</html> 

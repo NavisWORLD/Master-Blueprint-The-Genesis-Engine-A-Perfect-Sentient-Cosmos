@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Engine - Test Fixes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #00aaff;
+            border-radius: 5px;
+        }
+        
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        
+        .success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+        }
+        
+        .warning {
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+        }
+        
+        button {
+            background: #00aaff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0088cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Genesis Engine - Test Fixes</h1>
+    
+    <div class="test-section">
+        <h2>🔧 Component Availability Tests</h2>
+        <div id="component-tests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎨 Renderer Tests</h2>
+        <div id="renderer-tests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🖥️ UI Tests</h2>
+        <div id="ui-tests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🚀 Engine Tests</h2>
+        <div id="engine-tests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎮 Controls</h2>
+        <button onclick="testTabSwitching()">Test Tab Switching</button>
+        <button onclick="testUIWindow()">Test UI Window</button>
+        <button onclick="testRenderer()">Test Renderer</button>
+    </div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Audio and Sensory -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Rendering -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- AI and Creation -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Universe Management -->
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- Controls -->
+    <script src="modules/controls/PlayerControls.js"></script>
+    
+    <!-- UI and Controls -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+
+    <script>
+        function addTestResult(containerId, message, type = 'success') {
+            const container = document.getElementById(containerId);
+            const result = document.createElement('div');
+            result.className = `test-result ${type}`;
+            result.textContent = message;
+            container.appendChild(result);
+        }
+
+        function testComponents() {
+            const components = [
+                'EventBus', 'Config', 'Utils', 'UVO', 'UnifiedFormula', 
+                'AudioManager', 'SensoryInputManager', 'QuantumEventManager',
+                'Renderer', 'PostProcessor', 'Shaders', 'UIManager', 'PerformanceMonitor',
+                'AIConsciousness', 'ProceduralGenerationEngine', 'ObjectLibrary',
+                'UniverseManager', 'CameraController', 'InfiniteScaling', 'GenesisEngine'
+            ];
+            
+            components.forEach(component => {
+                if (window[component]) {
+                    addTestResult('component-tests', `✅ ${component}: Available`);
+                } else {
+                    addTestResult('component-tests', `❌ ${component}: UNDEFINED`, 'error');
+                }
+            });
+        }
+
+        function testRenderer() {
+            try {
+                if (window.Renderer) {
+                    window.Renderer.initialize();
+                    addTestResult('renderer-tests', '✅ Renderer initialized successfully');
+                    
+                    if (window.Renderer.renderer) {
+                        addTestResult('renderer-tests', '✅ WebGL renderer created');
+                    } else {
+                        addTestResult('renderer-tests', '❌ WebGL renderer not created', 'error');
+                    }
+                    
+                    if (window.Renderer.scene) {
+                        addTestResult('renderer-tests', '✅ Scene created');
+                    } else {
+                        addTestResult('renderer-tests', '❌ Scene not created', 'error');
+                    }
+                    
+                    if (window.Renderer.camera) {
+                        addTestResult('renderer-tests', '✅ Camera created');
+                    } else {
+                        addTestResult('renderer-tests', '❌ Camera not created', 'error');
+                    }
+                } else {
+                    addTestResult('renderer-tests', '❌ Renderer not available', 'error');
+                }
+            } catch (error) {
+                addTestResult('renderer-tests', `❌ Renderer error: ${error.message}`, 'error');
+            }
+        }
+
+        function testUI() {
+            try {
+                if (window.UIManager) {
+                    window.UIManager.initialize();
+                    addTestResult('ui-tests', '✅ UIManager initialized successfully');
+                    
+                    // Test tab switching
+                    window.UIManager.switchTab('performance');
+                    addTestResult('ui-tests', '✅ Tab switching working');
+                    
+                    // Test UI methods
+                    if (typeof window.UIManager.setCameraMode === 'function') {
+                        addTestResult('ui-tests', '✅ UI control methods available');
+                    } else {
+                        addTestResult('ui-tests', '❌ UI control methods missing', 'error');
+                    }
+                } else {
+                    addTestResult('ui-tests', '❌ UIManager not available', 'error');
+                }
+            } catch (error) {
+                addTestResult('ui-tests', `❌ UI error: ${error.message}`, 'error');
+            }
+        }
+
+        function testEngine() {
+            try {
+                if (window.GenesisEngine) {
+                    addTestResult('engine-tests', '✅ GenesisEngine class available');
+                    
+                    const engine = window.GenesisEngine;
+                    addTestResult('engine-tests', '✅ GenesisEngine instance created');
+                    
+                    // Test initialization
+                    engine.initialize().then(() => {
+                        addTestResult('engine-tests', '✅ GenesisEngine initialized successfully');
+                    }).catch(error => {
+                        addTestResult('engine-tests', `❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                    });
+                } else {
+                    addTestResult('engine-tests', '❌ GenesisEngine not available', 'error');
+                }
+            } catch (error) {
+                addTestResult('engine-tests', `❌ Engine error: ${error.message}`, 'error');
+            }
+        }
+
+        function testTabSwitching() {
+            if (window.UIManager) {
+                const tabs = ['controls', 'performance', 'universe', 'soul-dust', 'ai'];
+                tabs.forEach(tab => {
+                    window.UIManager.switchTab(tab);
+                    addTestResult('ui-tests', `✅ Switched to ${tab} tab`);
+                });
+            }
+        }
+
+        function testUIWindow() {
+            const mainWindow = document.getElementById('main-ui-window');
+            if (mainWindow) {
+                addTestResult('ui-tests', '✅ Main UI window found in DOM');
+            } else {
+                addTestResult('ui-tests', '❌ Main UI window not found in DOM', 'error');
+            }
+        }
+
+        function testRenderer() {
+            if (window.Renderer && window.Renderer.renderer) {
+                addTestResult('renderer-tests', '✅ Renderer is working');
+                window.Renderer.render(1/60);
+                addTestResult('renderer-tests', '✅ Renderer.render() called successfully');
+            } else {
+                addTestResult('renderer-tests', '❌ Renderer not working', 'error');
+            }
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', function() {
+            console.log('🧪 Running Genesis Engine tests...');
+            
+            // Wait a bit for all scripts to load
+            setTimeout(() => {
+                testComponents();
+                testRenderer();
+                testUI();
+                testEngine();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

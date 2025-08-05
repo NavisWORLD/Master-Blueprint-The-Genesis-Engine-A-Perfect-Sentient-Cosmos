@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Engine - Complete System Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #test-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 20, 40, 0.95);
+            border: 1px solid #00aaff;
+            border-radius: 8px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+            min-width: 300px;
+        }
+
+        #test-panel h3 {
+            color: #00aaff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #00aaff;
+            padding-bottom: 8px;
+        }
+
+        #test-panel button {
+            background: linear-gradient(45deg, #00aaff, #0088cc);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        #test-panel button:hover {
+            background: linear-gradient(45deg, #0088cc, #006699);
+            transform: translateY(-1px);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .status-inactive {
+            background: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .status-processing {
+            background: #ffff00;
+            box-shadow: 0 0 10px #ffff00;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #000, #001122, #000);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        #loading-screen h1 {
+            color: #00aaff;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00aaff;
+        }
+
+        #loading-screen p {
+            color: #ffffff;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .loading-bar {
+            width: 400px;
+            height: 4px;
+            background: rgba(0, 170, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00aaff, #00ffff);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00aaff;
+        }
+
+        #performance-monitor {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <h1>Genesis Engine</h1>
+        <p>Testing Complete System...</p>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loading-progress"></div>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="genesis-canvas"></canvas>
+        
+        <div id="test-panel">
+            <h3>🧪 System Test</h3>
+            <p><strong>Status:</strong> <span id="system-status">Initializing...</span></p>
+            <p><strong>FPS:</strong> <span id="fps-display">0</span></p>
+            <p><strong>Soul Dust:</strong> <span id="soul-dust-count">0</span></p>
+            <p><strong>Objects:</strong> <span id="object-count">0</span></p>
+            <br>
+            <button onclick="testUnifiedFormula()">Test Unified Formula</button>
+            <button onclick="testFormulaOfCreation()">Test Formula of Creation</button>
+            <button onclick="testQuantumBrain()">Test Quantum Brain</button>
+            <button onclick="testAICreation()">Test AI Creation</button>
+            <button onclick="testCriticalEvents()">Test Critical Events</button>
+            <button onclick="testAudioCapture()">Test Audio Capture</button>
+            <button onclick="testSoulDustGeneration()">Test Soul Dust Generation</button>
+            <button onclick="testPerformance()">Test Performance</button>
+        </div>
+
+        <div id="performance-monitor">
+            <div>FPS: <span id="fps">0</span></div>
+            <div>Memory: <span id="memory">0MB</span></div>
+            <div>Draw Calls: <span id="draw-calls">0</span></div>
+            <div>Triangles: <span id="triangles">0</span></div>
+        </div>
+    </div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Audio and Sensory -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Rendering -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- AI and Creation -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Universe Management -->
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- Controls -->
+    <script src="modules/controls/PlayerControls.js"></script>
+    
+    <!-- UI and Controls -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+    <script src="init_components.js"></script>
+    <script src="main.js"></script>
+
+    <script>
+        // Test functions
+        function testUnifiedFormula() {
+            console.log('🧪 Testing Unified Formula...');
+            
+            if (window.UnifiedFormula) {
+                const testParticle = {
+                    id: 'test_particle',
+                    position: { x: 0, y: 0, z: 0 },
+                    velocity: { x: 0, y: 0, z: 0 },
+                    mass: 1,
+                    energyOfConsciousness: 100,
+                    consciousnessField: 1.0,
+                    vibrationalFrequency: 440,
+                    lyapunovExponent: 0.1
+                };
+                
+                const testUniverse = {
+                    particles: [testParticle]
+                };
+                
+                const testSoulDustField = [];
+                
+                const potential = window.UnifiedFormula.calculateTotalPotential(testParticle, testUniverse, testSoulDustField);
+                console.log('✅ Unified Formula Test:', potential);
+                
+                document.getElementById('system-status').textContent = 'Unified Formula: OK';
+            } else {
+                console.error('❌ UnifiedFormula not available');
+                document.getElementById('system-status').textContent = 'Unified Formula: FAILED';
+            }
+        }
+
+        function testFormulaOfCreation() {
+            console.log('🧪 Testing Formula of Creation...');
+            
+            if (window.SoulDustParticle) {
+                const audioData = {
+                    frequency: 440,
+                    amplitude: 0.5,
+                    spectralComplexity: 0.3,
+                    timestamp: performance.now()
+                };
+                
+                const soulDustParticle = new window.SoulDustParticle(audioData);
+                console.log('✅ Formula of Creation Test:', soulDustParticle);
+                
+                document.getElementById('system-status').textContent = 'Formula of Creation: OK';
+            } else {
+                console.error('❌ SoulDustParticle not available');
+                document.getElementById('system-status').textContent = 'Formula of Creation: FAILED';
+            }
+        }
+
+        function testQuantumBrain() {
+            console.log('🧪 Testing Quantum Brain...');
+            
+            if (window.QuantumEventManager) {
+                const quantumState = window.QuantumEventManager.getQuantumBrainState();
+                console.log('✅ Quantum Brain Test:', quantumState);
+                
+                document.getElementById('system-status').textContent = 'Quantum Brain: OK';
+            } else {
+                console.error('❌ QuantumEventManager not available');
+                document.getElementById('system-status').textContent = 'Quantum Brain: FAILED';
+            }
+        }
+
+        function testAICreation() {
+            console.log('🧪 Testing AI Creation...');
+            
+            if (window.GenesisEngine && window.GenesisEngine.aiConsciousness) {
+                window.GenesisEngine.aiConsciousness.triggerCreation({
+                    eventType: 'test_creation',
+                    location: { x: 0, y: 0, z: 0 },
+                    energyReleased: 1000
+                });
+                
+                console.log('✅ AI Creation Test: Triggered');
+                document.getElementById('system-status').textContent = 'AI Creation: OK';
+            } else {
+                console.error('❌ AI Consciousness not available');
+                document.getElementById('system-status').textContent = 'AI Creation: FAILED';
+            }
+        }
+
+        function testCriticalEvents() {
+            console.log('🧪 Testing Critical Events...');
+            
+            if (window.QuantumEventManager) {
+                window.EventBus.publish('engine:criticalEventTriggered', {
+                    eventType: 'test_critical',
+                    location: { x: 0, y: 0, z: 0 },
+                    energyReleased: 1500,
+                    timestamp: performance.now()
+                });
+                
+                console.log('✅ Critical Events Test: Published');
+                document.getElementById('system-status').textContent = 'Critical Events: OK';
+            } else {
+                console.error('❌ QuantumEventManager not available');
+                document.getElementById('system-status').textContent = 'Critical Events: FAILED';
+            }
+        }
+
+        function testAudioCapture() {
+            console.log('🧪 Testing Audio Capture...');
+            
+            if (window.SensoryInputManager) {
+                const audioAnalysis = window.SensoryInputManager.getAudioAnalysis();
+                console.log('✅ Audio Capture Test:', audioAnalysis);
+                
+                document.getElementById('system-status').textContent = 'Audio Capture: OK';
+            } else {
+                console.error('❌ SensoryInputManager not available');
+                document.getElementById('system-status').textContent = 'Audio Capture: FAILED';
+            }
+        }
+
+        function testSoulDustGeneration() {
+            console.log('🧪 Testing Soul Dust Generation...');
+            
+            if (window.GenesisEngine) {
+                // Generate test Soul Dust particles
+                for (let i = 0; i < 10; i++) {
+                    const audioData = {
+                        frequency: 440 + Math.random() * 880,
+                        amplitude: 0.5 + Math.random() * 0.5,
+                        spectralComplexity: Math.random(),
+                        timestamp: performance.now()
+                    };
+                    
+                    const particle = new window.SoulDustParticle(audioData);
+                    window.GenesisEngine.soulDustField.push(particle);
+                }
+                
+                console.log('✅ Soul Dust Generation Test:', window.GenesisEngine.soulDustField.length, 'particles');
+                document.getElementById('soul-dust-count').textContent = window.GenesisEngine.soulDustField.length;
+                document.getElementById('system-status').textContent = 'Soul Dust Generation: OK';
+            } else {
+                console.error('❌ GenesisEngine not available');
+                document.getElementById('system-status').textContent = 'Soul Dust Generation: FAILED';
+            }
+        }
+
+        function testPerformance() {
+            console.log('🧪 Testing Performance...');
+            
+            if (window.GenesisEngine) {
+                const stats = window.GenesisEngine.getStats();
+                console.log('✅ Performance Test:', stats);
+                
+                document.getElementById('fps-display').textContent = Math.round(stats.fps);
+                document.getElementById('object-count').textContent = stats.objectCount;
+                document.getElementById('system-status').textContent = 'Performance: OK';
+            } else {
+                console.error('❌ GenesisEngine not available');
+                document.getElementById('system-status').textContent = 'Performance: FAILED';
+            }
+        }
+
+        // Update performance monitor
+        function updatePerformanceMonitor() {
+            if (window.GenesisEngine) {
+                const stats = window.GenesisEngine.getStats();
+                
+                document.getElementById('fps').textContent = Math.round(stats.fps);
+                document.getElementById('memory').textContent = stats.memoryUsage ? stats.memoryUsage.toFixed(1) + 'MB' : 'N/A';
+                document.getElementById('draw-calls').textContent = stats.drawCalls || 0;
+                document.getElementById('triangles').textContent = stats.triangles || 0;
+                
+                document.getElementById('soul-dust-count').textContent = stats.soulDustCount || 0;
+                document.getElementById('object-count').textContent = stats.objectCount || 0;
+            }
+        }
+
+        // Update performance monitor every second
+        setInterval(updatePerformanceMonitor, 1000);
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Genesis Engine Complete System Test initialized');
+            
+            // Hide loading screen after a delay
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 1000);
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 

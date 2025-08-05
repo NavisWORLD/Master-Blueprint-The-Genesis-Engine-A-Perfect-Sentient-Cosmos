@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Loading Debug</title>
+</head>
+<body>
+    <h1>Script Loading Debug</h1>
+    <div id="results"></div>
+
+    <script>
+        function log(message) {
+            console.log(message);
+            document.getElementById('results').innerHTML += '<p>' + message + '</p>';
+        }
+
+        log('🔍 Starting script loading debug...');
+
+        // Test each script individually
+        const scripts = [
+            'modules/core/EventBus.js',
+            'modules/core/Config.js',
+            'modules/core/Utils.js',
+            'modules/physics/UnifiedFormula.js',
+            'modules/physics/UVO.js',
+            'modules/physics/CST.js',
+            'modules/sensory/AudioManager.js',
+            'modules/sensory/SensoryInputManager.js',
+            'modules/soul-dust/SoulDustParticle.js',
+            'modules/soul-dust/QuantumEventManager.js',
+            'modules/rendering/Renderer.js',
+            'modules/rendering/PostProcessor.js',
+            'modules/rendering/Shaders.js',
+            'modules/ai/AIConsciousness.js',
+            'modules/ai/ProceduralGenerationEngine.js',
+            'modules/ai/ObjectLibrary.js',
+            'modules/universe/UniverseManager.js',
+            'modules/universe/CameraController.js',
+            'modules/universe/InfiniteScaling.js',
+            'modules/ui/UIManager.js',
+            'modules/ui/PerformanceMonitor.js',
+            'modules/GenesisEngine.js'
+        ];
+
+        let loadedCount = 0;
+        let errorCount = 0;
+
+        function loadScript(index) {
+            if (index >= scripts.length) {
+                log('✅ Script loading completed. Loaded: ' + loadedCount + ', Errors: ' + errorCount);
+                
+                // Check global instances
+                setTimeout(() => {
+                    log('🔍 Checking global instances after all scripts loaded...');
+                    const globalInstances = [
+                        'EventBus', 'Config', 'Utils', 'UVO', 'UnifiedFormula', 
+                        'AudioManager', 'SensoryInputManager', 'QuantumEventManager',
+                        'Renderer', 'PostProcessor', 'Shaders', 'UIManager', 'PerformanceMonitor',
+                        'AIConsciousness', 'ProceduralGenerationEngine', 'ObjectLibrary',
+                        'UniverseManager', 'CameraController', 'InfiniteScaling', 'GenesisEngine'
+                    ];
+                    
+                    for (const instanceName of globalInstances) {
+                        if (window[instanceName]) {
+                            log(`✅ ${instanceName}: Available`);
+                        } else {
+                            log(`❌ ${instanceName}: UNDEFINED`);
+                        }
+                    }
+                }, 100);
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = scripts[index];
+            script.onload = function() {
+                log('✅ Loaded: ' + scripts[index]);
+                loadedCount++;
+                loadScript(index + 1);
+            };
+            script.onerror = function() {
+                log('❌ Failed to load: ' + scripts[index]);
+                errorCount++;
+                loadScript(index + 1);
+            };
+            document.head.appendChild(script);
+        }
+
+        // Start loading scripts
+        loadScript(0);
+    </script>
+</body>
+</html> 

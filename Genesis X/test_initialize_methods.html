@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialize Methods Test</title>
+</head>
+<body>
+    <h1>Initialize Methods Test</h1>
+    <div id="results"></div>
+
+    <script>
+        function log(message) {
+            console.log(message);
+            document.getElementById('results').innerHTML += '<p>' + message + '</p>';
+        }
+
+        log('🔍 Testing initialize methods...');
+    </script>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Audio and Sensory -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Rendering -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- AI and Creation -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Universe Management -->
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- UI and Controls -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+
+    <script>
+        log('🔍 All scripts loaded, checking initialize methods...');
+        
+        const modulesToCheck = [
+            'EventBus', 'Config', 'Utils', 'UVO', 'UnifiedFormula', 
+            'AudioManager', 'SensoryInputManager', 'QuantumEventManager',
+            'Renderer', 'PostProcessor', 'Shaders', 'UIManager', 'PerformanceMonitor',
+            'AIConsciousness', 'ProceduralGenerationEngine', 'ObjectLibrary',
+            'UniverseManager', 'CameraController', 'InfiniteScaling', 'CST'
+        ];
+        
+        let allGood = true;
+        
+        for (const moduleName of modulesToCheck) {
+            if (window[moduleName]) {
+                const hasInitialize = typeof window[moduleName].initialize === 'function';
+                if (hasInitialize) {
+                    log(`✅ ${moduleName}: Has initialize method`);
+                    
+                    // Test calling initialize
+                    try {
+                        window[moduleName].initialize();
+                        log(`✅ ${moduleName}: initialize() called successfully`);
+                    } catch (error) {
+                        log(`❌ ${moduleName}: initialize() failed - ${error.message}`);
+                        allGood = false;
+                    }
+                } else {
+                    log(`❌ ${moduleName}: Missing initialize method`);
+                    allGood = false;
+                }
+            } else {
+                log(`❌ ${moduleName}: Not available`);
+                allGood = false;
+            }
+        }
+        
+        if (allGood) {
+            log('🎉 All modules have initialize methods and can be called!');
+        } else {
+            log('⚠️ Some modules are missing initialize methods or failed to initialize');
+        }
+        
+        // Test GenesisEngine class
+        log('🔍 Testing GenesisEngine class...');
+        if (typeof window.GenesisEngine !== 'undefined') {
+            log('✅ GenesisEngine class is available!');
+            try {
+                const engine = window.GenesisEngine;
+                log('✅ GenesisEngine instance created!');
+                log('Testing GenesisEngine.initialize()...');
+                engine.initialize().then(() => {
+                    log('✅ GenesisEngine.initialize() completed successfully!');
+                }).catch(error => {
+                    log('❌ GenesisEngine.initialize() failed: ' + error.message);
+                });
+            } catch (error) {
+                log('❌ Failed to create GenesisEngine instance: ' + error.message);
+            }
+        } else {
+            log('❌ GenesisEngine class is NOT available!');
+        }
+    </script>
+</body>
+</html> 

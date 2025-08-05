@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Genesis Engine Initialization Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #0a5; }
+        .error { background: #a05; }
+        .warning { background: #a50; }
+        .info { background: #05a; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Complete Genesis Engine Initialization Test</h1>
+    <div id="results"></div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Fallback for missing dependencies -->
+    <script>
+        if (typeof Tone === 'undefined') {
+            console.warn('⚠️ Tone.js not loaded, creating fallback');
+            window.Tone = {
+                AudioContext: function() { return { resume: () => {} }; },
+                Analyser: function() { return { connect: () => {}, getByteFrequencyData: () => {} }; }
+            };
+        }
+        
+        if (typeof SimplexNoise === 'undefined') {
+            console.warn('⚠️ SimplexNoise not loaded, creating fallback');
+            window.SimplexNoise = function() {
+                return {
+                    noise2D: () => Math.random() * 2 - 1,
+                    noise3D: () => Math.random() * 2 - 1,
+                    noise4D: () => Math.random() * 2 - 1
+                };
+            };
+        }
+        
+        if (typeof gsap === 'undefined') {
+            console.warn('⚠️ GSAP not loaded, creating fallback');
+            window.gsap = {
+                to: (target, duration, vars) => Promise.resolve(),
+                from: (target, duration, vars) => Promise.resolve(),
+                timeline: () => ({ to: () => {}, from: () => {} })
+            };
+        }
+    </script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Audio and Sensory -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Rendering -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- AI and Creation -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Universe Management -->
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- Controls -->
+    <script src="modules/controls/PlayerControls.js"></script>
+    
+    <!-- UI and Controls -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+    <script src="init_components.js"></script>
+
+    <script>
+        function addResult(message, type = 'success') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        async function testCompleteInitialization() {
+            console.log('🧪 Testing complete Genesis Engine initialization...');
+            addResult('🧪 Testing complete Genesis Engine initialization...', 'info');
+
+            // Test 1: Check Utils initialization
+            addResult('Step 1: Checking Utils initialization...', 'info');
+            
+            if (!window.Utils) {
+                addResult('❌ Utils is not available', 'error');
+                return;
+            }
+            
+            if (!window.Utils.isInitialized) {
+                addResult('❌ Utils is not initialized', 'error');
+                return;
+            }
+            
+            addResult('✅ Utils is properly initialized', 'success');
+
+            // Test 2: Check all core components
+            addResult('Step 2: Checking core components...', 'info');
+            
+            const coreComponents = [
+                'EventBus', 'Config', 'TokenizationEngine', 'PlayerControls',
+                'UVO', 'UnifiedFormula', 'CST',
+                'AudioManager', 'SensoryInputManager',
+                'SoulDustParticle', 'QuantumEventManager',
+                'Renderer', 'PostProcessor', 'Shaders',
+                'UIManager', 'PerformanceMonitor',
+                'AIConsciousness', 'ProceduralGenerationEngine', 'ObjectLibrary',
+                'UniverseManager', 'CameraController', 'InfiniteScaling', 'GenesisEngine'
+            ];
+
+            let allComponentsAvailable = true;
+            for (const component of coreComponents) {
+                if (window[component]) {
+                    addResult(`✅ ${component} is available`);
+                } else {
+                    addResult(`❌ ${component} is not available`, 'error');
+                    allComponentsAvailable = false;
+                }
+            }
+
+            if (!allComponentsAvailable) {
+                addResult('❌ Some core components are missing', 'error');
+                return;
+            }
+
+            addResult('✅ All core components are available', 'success');
+
+            // Test 3: Test GenesisEngine initialization
+            addResult('Step 3: Testing GenesisEngine initialization...', 'info');
+            
+            try {
+                // Use the global instance
+                const genesisEngine = window.GenesisEngine;
+                
+                if (!genesisEngine) {
+                    addResult('❌ GenesisEngine instance is not available', 'error');
+                    return;
+                }
+                
+                addResult('✅ GenesisEngine instance is available', 'success');
+                
+                // Test initialization
+                await genesisEngine.initialize();
+                addResult('✅ GenesisEngine initialization successful!', 'success');
+                
+                // Test starting the engine
+                genesisEngine.start();
+                addResult('✅ GenesisEngine started successfully!', 'success');
+                
+                // Test stopping the engine
+                genesisEngine.stop();
+                addResult('✅ GenesisEngine stopped successfully!', 'success');
+                
+                addResult('🎉 Complete Genesis Engine test passed!', 'success');
+                console.log('🎉 Complete Genesis Engine test passed!');
+                
+            } catch (error) {
+                addResult(`❌ GenesisEngine test failed: ${error.message}`, 'error');
+                console.error('❌ GenesisEngine test failed:', error);
+            }
+        }
+
+        // Wait for all components to be initialized
+        window.addEventListener('load', function() {
+            setTimeout(testCompleteInitialization, 2000);
+        });
+    </script>
+</body>
+</html> 

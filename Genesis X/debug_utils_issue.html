@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Utils Issue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        .debug-info {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #333;
+        }
+        .error { background: #a05; }
+        .success { background: #0a5; }
+        .warning { background: #a50; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Utils Issue</h1>
+    <div id="debug-output"></div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+    <script src="init_components.js"></script>
+
+    <script>
+        function addDebugInfo(message, type = 'info') {
+            const output = document.getElementById('debug-output');
+            const div = document.createElement('div');
+            div.className = `debug-info ${type}`;
+            div.textContent = message;
+            output.appendChild(div);
+            console.log(message);
+        }
+
+        function debugUtilsIssue() {
+            addDebugInfo('🔍 Starting Utils issue debug...');
+
+            // Check 1: Utils availability
+            addDebugInfo(`Utils available: ${!!window.Utils}`);
+            addDebugInfo(`Utils initialized: ${window.Utils ? window.Utils.isInitialized : 'N/A'}`);
+
+            if (window.Utils) {
+                addDebugInfo('✅ Utils is available');
+                
+                // Check 2: Test randomPointInSphere method
+                try {
+                    const point = window.Utils.randomPointInSphere(10);
+                    addDebugInfo(`randomPointInSphere result: x=${point.x}, y=${point.y}, z=${point.z}`, 'success');
+                } catch (error) {
+                    addDebugInfo(`❌ randomPointInSphere error: ${error.message}`, 'error');
+                }
+
+                // Check 3: Test other critical methods
+                const methods = ['generateUUID', 'frequencyToRGB', 'getConfig', 'clamp', 'map', 'random'];
+                for (const method of methods) {
+                    if (typeof window.Utils[method] === 'function') {
+                        addDebugInfo(`✅ ${method} method available`);
+                    } else {
+                        addDebugInfo(`❌ ${method} method not available`, 'error');
+                    }
+                }
+            } else {
+                addDebugInfo('❌ Utils is not available', 'error');
+            }
+
+            // Check 4: Test SoulDustParticle creation
+            if (window.SoulDustParticle) {
+                addDebugInfo('✅ SoulDustParticle is available');
+                
+                try {
+                    const audioData = {
+                        frequency: 440,
+                        amplitude: 0.5,
+                        spectralComplexity: 0.3,
+                        timestamp: Date.now(),
+                        buffer: new Uint8Array(1024)
+                    };
+                    
+                    const particle = new window.SoulDustParticle(audioData);
+                    addDebugInfo('✅ SoulDustParticle created successfully', 'success');
+                    addDebugInfo(`Particle position: x=${particle.position.x}, y=${particle.position.y}, z=${particle.position.z}`, 'success');
+                } catch (error) {
+                    addDebugInfo(`❌ SoulDustParticle creation failed: ${error.message}`, 'error');
+                    addDebugInfo(`Error stack: ${error.stack}`, 'error');
+                }
+            } else {
+                addDebugInfo('❌ SoulDustParticle is not available', 'error');
+            }
+
+            // Check 5: Test GenesisEngine initialization
+            if (window.GenesisEngine) {
+                addDebugInfo('✅ GenesisEngine is available');
+                
+                try {
+                    const engine = window.GenesisEngine;
+                    addDebugInfo('✅ GenesisEngine instance retrieved');
+                    
+                    // Test initialization
+                    engine.initialize().then(() => {
+                        addDebugInfo('✅ GenesisEngine initialization successful!', 'success');
+                    }).catch((error) => {
+                        addDebugInfo(`❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                        addDebugInfo(`Error stack: ${error.stack}`, 'error');
+                    });
+                    
+                } catch (error) {
+                    addDebugInfo(`❌ GenesisEngine test failed: ${error.message}`, 'error');
+                    addDebugInfo(`Error stack: ${error.stack}`, 'error');
+                }
+            } else {
+                addDebugInfo('❌ GenesisEngine is not available', 'error');
+            }
+        }
+
+        // Run debug after components are loaded
+        window.addEventListener('load', function() {
+            setTimeout(debugUtilsIssue, 1500);
+        });
+    </script>
+</body>
+</html> 

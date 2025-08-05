@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Engine - Undefined Error Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #0a5; }
+        .error { background: #a05; }
+        .warning { background: #a50; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Genesis Engine - Undefined Error Test</h1>
+    <div id="test-results"></div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Genesis Engine Core Modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    
+    <!-- Physics and Math -->
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    
+    <!-- Audio and Sensory -->
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    
+    <!-- Soul Dust System -->
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    
+    <!-- Rendering -->
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    
+    <!-- AI and Creation -->
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    
+    <!-- Universe Management -->
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    
+    <!-- Controls -->
+    <script src="modules/controls/PlayerControls.js"></script>
+    
+    <!-- UI and Controls -->
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    
+    <!-- Main Engine -->
+    <script src="modules/GenesisEngine.js"></script>
+    <script src="init_components.js"></script>
+
+    <script>
+        function addTestResult(message, type = 'success') {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = message;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        async function runTests() {
+            console.log('🧪 Starting undefined error tests...');
+            addTestResult('🧪 Starting undefined error tests...');
+
+            // Test 1: Check if Utils is available
+            addTestResult('Test 1: Checking Utils availability...');
+            if (window.Utils) {
+                addTestResult('✅ Utils is available', 'success');
+                
+                // Test 2: Check if Utils is initialized
+                if (window.Utils.isInitialized) {
+                    addTestResult('✅ Utils is initialized', 'success');
+                } else {
+                    addTestResult('⚠️ Utils is not initialized', 'warning');
+                    window.Utils.initialize();
+                    addTestResult('✅ Utils initialized manually', 'success');
+                }
+                
+                // Test 3: Check if randomPointInSphere method exists
+                if (typeof window.Utils.randomPointInSphere === 'function') {
+                    addTestResult('✅ randomPointInSphere method exists', 'success');
+                    
+                    // Test 4: Test the method
+                    try {
+                        const testPoint = window.Utils.randomPointInSphere(10);
+                        if (testPoint && typeof testPoint.x === 'number' && 
+                            typeof testPoint.y === 'number' && 
+                            typeof testPoint.z === 'number') {
+                            addTestResult('✅ randomPointInSphere works correctly', 'success');
+                        } else {
+                            addTestResult('❌ randomPointInSphere returned invalid result', 'error');
+                        }
+                    } catch (error) {
+                        addTestResult(`❌ randomPointInSphere failed: ${error.message}`, 'error');
+                    }
+                } else {
+                    addTestResult('❌ randomPointInSphere method does not exist', 'error');
+                }
+            } else {
+                addTestResult('❌ Utils is not available', 'error');
+            }
+
+            // Test 5: Check if SoulDustParticle is available
+            addTestResult('Test 5: Checking SoulDustParticle availability...');
+            if (window.SoulDustParticle) {
+                addTestResult('✅ SoulDustParticle is available', 'success');
+                
+                // Test 6: Try to create a SoulDustParticle
+                try {
+                    const testAudioData = {
+                        frequency: 440,
+                        amplitude: 0.5,
+                        spectralComplexity: 0,
+                        timestamp: performance.now(),
+                        buffer: new Float32Array(1024)
+                    };
+                    
+                    const testParticle = new window.SoulDustParticle(testAudioData);
+                    addTestResult('✅ SoulDustParticle created successfully', 'success');
+                    
+                    // Test 7: Check if particle has position
+                    if (testParticle.position && typeof testParticle.position.x === 'number') {
+                        addTestResult('✅ SoulDustParticle position is valid', 'success');
+                    } else {
+                        addTestResult('❌ SoulDustParticle position is invalid', 'error');
+                    }
+                } catch (error) {
+                    addTestResult(`❌ SoulDustParticle creation failed: ${error.message}`, 'error');
+                }
+            } else {
+                addTestResult('❌ SoulDustParticle is not available', 'error');
+            }
+
+            // Test 8: Check GenesisEngine initialization
+            addTestResult('Test 8: Checking GenesisEngine initialization...');
+            if (window.GenesisEngine) {
+                addTestResult('✅ GenesisEngine is available', 'success');
+                
+                try {
+                    await window.GenesisEngine.initialize();
+                    addTestResult('✅ GenesisEngine initialized successfully', 'success');
+                } catch (error) {
+                    addTestResult(`❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                    console.error('GenesisEngine initialization error:', error);
+                }
+            } else {
+                addTestResult('❌ GenesisEngine is not available', 'error');
+            }
+
+            addTestResult('🏁 All tests completed');
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html> 

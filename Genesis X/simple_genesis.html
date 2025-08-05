@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Engine - Simple Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .ui-window {
+            position: absolute;
+            background: rgba(0, 20, 40, 0.95);
+            border: 1px solid #00aaff;
+            border-radius: 8px;
+            padding: 15px;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+            min-width: 300px;
+            max-width: 500px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .ui-window h3 {
+            color: #00aaff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #00aaff;
+            padding-bottom: 8px;
+        }
+
+        .ui-window p {
+            font-size: 12px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .ui-window button {
+            background: linear-gradient(45deg, #00aaff, #0088cc);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .ui-window button:hover {
+            background: linear-gradient(45deg, #0088cc, #006699);
+            transform: translateY(-1px);
+        }
+
+        /* Tab System */
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #00aaff;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            background: rgba(0, 40, 80, 0.8);
+            border: 1px solid #00aaff;
+            border-bottom: none;
+            color: #00aaff;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border-radius: 4px 4px 0 0;
+            margin-right: 2px;
+        }
+
+        .tab.active {
+            background: #00aaff;
+            color: #000;
+        }
+
+        .tab:hover {
+            background: rgba(0, 170, 255, 0.8);
+            color: #000;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Main UI Window */
+        #main-ui-window {
+            top: 20px;
+            left: 20px;
+            width: 400px;
+            height: 500px;
+        }
+
+        .draggable {
+            cursor: move;
+        }
+
+        .draggable:hover {
+            background: rgba(0, 30, 60, 0.95);
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #000, #001122, #000);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        #loading-screen h1 {
+            color: #00aaff;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00aaff;
+        }
+
+        #loading-screen p {
+            color: #ffffff;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .loading-bar {
+            width: 400px;
+            height: 4px;
+            background: rgba(0, 170, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00aaff, #00ffff);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00aaff;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <h1>Genesis Engine</h1>
+        <p>Initializing the Living Cosmos...</p>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loading-progress"></div>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="genesis-canvas"></canvas>
+        
+        <div id="ui-overlay">
+            <div id="main-ui-window" class="ui-window draggable">
+                <div class="tab-container">
+                    <div class="tab active" data-tab="controls">🎮 Controls</div>
+                    <div class="tab" data-tab="performance">📊 Performance</div>
+                    <div class="tab" data-tab="universe">🌌 Universe</div>
+                    <div class="tab" data-tab="soul-dust">✨ Soul Dust</div>
+                    <div class="tab" data-tab="ai">🧠 AI</div>
+                </div>
+
+                <!-- Controls Tab -->
+                <div id="controls-tab" class="tab-content active">
+                    <h3>🎮 Controls</h3>
+                    <p><strong>Camera Modes:</strong></p>
+                    <button onclick="setCameraMode('orbit')">Orbit (O)</button>
+                    <button onclick="setCameraMode('first-person')">First-Person (F)</button>
+                    <button onclick="setCameraMode('cinematic')">Cinematic (C)</button>
+                    <br><br>
+                    <p><strong>Actions:</strong></p>
+                    <button onclick="resetView()">Reset View</button>
+                    <button onclick="addCube()">Add Cube</button>
+                    <button onclick="addSphere()">Add Sphere</button>
+                    <button onclick="clearScene()">Clear Scene</button>
+                </div>
+
+                <!-- Performance Tab -->
+                <div id="performance-tab" class="tab-content">
+                    <h3>📊 Performance</h3>
+                    <p><strong>FPS:</strong> <span id="fps-display">0</span></p>
+                    <p><strong>Frame Time:</strong> <span id="frame-time-display">0ms</span></p>
+                    <p><strong>Memory:</strong> <span id="memory-display">0MB</span></p>
+                    <p><strong>Objects:</strong> <span id="objects-display">0</span></p>
+                </div>
+
+                <!-- Universe Tab -->
+                <div id="universe-tab" class="tab-content">
+                    <h3>🌌 Universe</h3>
+                    <p><strong>Objects:</strong> <span id="universe-objects">0</span></p>
+                    <p><strong>Camera Position:</strong> <span id="camera-position">0, 0, 0</span></p>
+                    <p><strong>Camera Rotation:</strong> <span id="camera-rotation">0, 0, 0</span></p>
+                </div>
+
+                <!-- Soul Dust Tab -->
+                <div id="soul-dust-tab" class="tab-content">
+                    <h3>✨ Soul Dust</h3>
+                    <p><strong>Particles:</strong> <span id="soul-dust-count">0</span></p>
+                    <p><strong>Total Energy:</strong> <span id="soul-dust-energy">0</span></p>
+                    <p><strong>Status:</strong> <span id="soul-dust-status">Inactive</span></p>
+                </div>
+
+                <!-- AI Tab -->
+                <div id="ai-tab" class="tab-content">
+                    <h3>🧠 AI Consciousness</h3>
+                    <p><strong>Learning:</strong> <span id="ai-learning-status">Inactive</span></p>
+                    <p><strong>Creation:</strong> <span id="ai-creation-status">Inactive</span></p>
+                    <p><strong>Creation Count:</strong> <span id="ai-creation-count">0</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Global variables
+        let renderer, scene, camera;
+        let isRunning = false;
+        let animationId;
+        let frameCount = 0;
+        let lastTime = 0;
+        let fps = 0;
+        
+        // Camera control variables
+        let cameraMode = 'orbit';
+        let orbitDistance = 10;
+        let orbitPhi = 0;
+        let orbitTheta = 0;
+        
+        // Performance tracking
+        let frameTimes = [];
+        let memoryUsage = 0;
+        
+        function updateLoadingProgress(progress, message) {
+            const progressBar = document.getElementById('loading-progress');
+            const loadingScreen = document.getElementById('loading-screen');
+            
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+            }
+            
+            if (progress >= 100) {
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 1000);
+                }, 500);
+            }
+        }
+        
+        function initializeEngine() {
+            updateLoadingProgress(10, 'Initializing Three.js...');
+            
+            try {
+                // Check if Three.js is available
+                if (typeof THREE === 'undefined') {
+                    throw new Error('Three.js is not loaded');
+                }
+                
+                updateLoadingProgress(30, 'Creating scene...');
+                
+                // Create scene
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x000011);
+                
+                updateLoadingProgress(50, 'Creating camera...');
+                
+                // Create camera
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(0, 0, orbitDistance);
+                
+                updateLoadingProgress(70, 'Creating renderer...');
+                
+                // Create renderer
+                renderer = new THREE.WebGLRenderer({ 
+                    canvas: document.getElementById('genesis-canvas'),
+                    antialias: true 
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                updateLoadingProgress(85, 'Adding lighting...');
+                
+                // Add lighting
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+                scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(10, 10, 5);
+                directionalLight.castShadow = true;
+                scene.add(directionalLight);
+                
+                updateLoadingProgress(95, 'Starting render loop...');
+                
+                // Start rendering
+                isRunning = true;
+                animate();
+                
+                updateLoadingProgress(100, 'Engine ready!');
+                
+                console.log('✅ Genesis Engine initialized successfully');
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize engine:', error);
+                updateLoadingProgress(0, 'Initialization failed: ' + error.message);
+            }
+        }
+        
+        function animate() {
+            if (!isRunning) return;
+            
+            const currentTime = performance.now();
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            
+            // Update performance metrics
+            updatePerformanceMetrics(deltaTime);
+            
+            // Update camera based on mode
+            updateCamera();
+            
+            // Render the scene
+            renderer.render(scene, camera);
+            
+            // Continue animation loop
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function updatePerformanceMetrics(deltaTime) {
+            frameCount++;
+            
+            // Calculate FPS
+            fps = 1000 / deltaTime;
+            
+            // Store frame time for averaging
+            frameTimes.push(deltaTime);
+            if (frameTimes.length > 60) {
+                frameTimes.shift();
+            }
+            
+            // Calculate average frame time
+            const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+            
+            // Update UI
+            document.getElementById('fps-display').textContent = Math.round(fps);
+            document.getElementById('frame-time-display').textContent = Math.round(avgFrameTime) + 'ms';
+            document.getElementById('objects-display').textContent = scene.children.length;
+            
+            // Update camera info
+            document.getElementById('camera-position').textContent = 
+                `${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)}`;
+            document.getElementById('camera-rotation').textContent = 
+                `${(camera.rotation.x * 180 / Math.PI).toFixed(1)}, ${(camera.rotation.y * 180 / Math.PI).toFixed(1)}, ${(camera.rotation.z * 180 / Math.PI).toFixed(1)}`;
+            
+            // Update universe objects count
+            document.getElementById('universe-objects').textContent = scene.children.length;
+        }
+        
+        function updateCamera() {
+            switch (cameraMode) {
+                case 'orbit':
+                    // Orbit camera around origin
+                    const x = orbitDistance * Math.sin(orbitTheta) * Math.cos(orbitPhi);
+                    const y = orbitDistance * Math.sin(orbitPhi);
+                    const z = orbitDistance * Math.cos(orbitTheta) * Math.cos(orbitPhi);
+                    
+                    camera.position.set(x, y, z);
+                    camera.lookAt(0, 0, 0);
+                    break;
+                    
+                case 'first-person':
+                    // First-person camera (no automatic movement)
+                    break;
+                    
+                case 'cinematic':
+                    // Cinematic camera with automatic movement
+                    const time = performance.now() * 0.001;
+                    const radius = 15;
+                    const speed = 0.5;
+                    
+                    camera.position.x = Math.cos(time * speed) * radius;
+                    camera.position.z = Math.sin(time * speed) * radius;
+                    camera.position.y = 5 + Math.sin(time * speed * 0.5) * 3;
+                    camera.lookAt(0, 0, 0);
+                    break;
+            }
+        }
+        
+        // Control functions
+        function setCameraMode(mode) {
+            cameraMode = mode;
+            console.log(`🎮 Camera mode set to: ${mode}`);
+        }
+        
+        function resetView() {
+            orbitPhi = 0;
+            orbitTheta = 0;
+            orbitDistance = 10;
+            camera.position.set(0, 0, orbitDistance);
+            camera.lookAt(0, 0, 0);
+        }
+        
+        function addCube() {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshPhongMaterial({ color: 0x00aaff });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.set(0, 0, 0);
+            scene.add(cube);
+            
+            console.log('✅ Cube added to scene');
+        }
+        
+        function addSphere() {
+            const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const material = new THREE.MeshPhongMaterial({ color: 0xff00aa });
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(2, 0, 0);
+            scene.add(sphere);
+            
+            console.log('✅ Sphere added to scene');
+        }
+        
+        function clearScene() {
+            while(scene.children.length > 0) {
+                scene.remove(scene.children[0]);
+            }
+            
+            // Re-add lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            console.log('✅ Scene cleared');
+        }
+        
+        // Tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(targetTab + '-tab').classList.add('active');
+                });
+            });
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+        
+        // Initialize when page loads
+        window.addEventListener('load', function() {
+            console.log('🚀 Starting Genesis Engine...');
+            setTimeout(initializeEngine, 1000);
+        });
+    </script>
+</body>
+</html> 

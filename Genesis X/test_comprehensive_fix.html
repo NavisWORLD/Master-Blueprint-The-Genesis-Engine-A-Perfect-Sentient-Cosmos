@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Genesis Engine Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        .info { background: #2d2d5a; }
+        .warning { background: #5a5a2d; }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .component-test {
+            border: 1px solid #444;
+            padding: 15px;
+            border-radius: 5px;
+            background: #2a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🌌 Comprehensive Genesis Engine Fix Test</h1>
+        <p>Testing all constructor fixes and component availability...</p>
+        
+        <button onclick="runComprehensiveTest()">Run Comprehensive Test</button>
+        <button onclick="clearResults()">Clear Results</button>
+        
+        <div id="results"></div>
+        <div id="component-tests" class="component-grid"></div>
+    </div>
+
+    <!-- Load Three.js first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Load all Genesis Engine modules -->
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/core/Config.js"></script>
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/Token.js"></script>
+    <script src="modules/core/TokenizationEngine.js"></script>
+    <script src="modules/controls/PlayerControls.js"></script>
+    <script src="modules/physics/UVO.js"></script>
+    <script src="modules/physics/UnifiedFormula.js"></script>
+    <script src="modules/physics/CST.js"></script>
+    <script src="modules/sensory/AudioManager.js"></script>
+    <script src="modules/sensory/SensoryInputManager.js"></script>
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    <script src="modules/soul-dust/QuantumEventManager.js"></script>
+    <script src="modules/rendering/Renderer.js"></script>
+    <script src="modules/rendering/PostProcessor.js"></script>
+    <script src="modules/rendering/Shaders.js"></script>
+    <script src="modules/ui/UIManager.js"></script>
+    <script src="modules/ui/PerformanceMonitor.js"></script>
+    <script src="modules/ai/AIConsciousness.js"></script>
+    <script src="modules/ai/ProceduralGenerationEngine.js"></script>
+    <script src="modules/ai/ObjectLibrary.js"></script>
+    <script src="modules/universe/UniverseManager.js"></script>
+    <script src="modules/universe/CameraController.js"></script>
+    <script src="modules/universe/InfiniteScaling.js"></script>
+    <script src="modules/GenesisEngine.js"></script>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('component-tests').innerHTML = '';
+        }
+
+        function testComponent(componentName, instanceName, className) {
+            const container = document.getElementById('component-tests');
+            const div = document.createElement('div');
+            div.className = 'component-test';
+            
+            const title = document.createElement('h3');
+            title.textContent = `🔧 ${componentName}`;
+            div.appendChild(title);
+            
+            const results = document.createElement('div');
+            results.id = `${componentName}-results`;
+            div.appendChild(results);
+            
+            container.appendChild(div);
+            
+            // Test the component
+            const addComponentResult = (message, type = 'info') => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `test-result ${type}`;
+                resultDiv.textContent = message;
+                results.appendChild(resultDiv);
+            };
+            
+            try {
+                // Test 1: Check if instance is available
+                if (window[instanceName]) {
+                    addComponentResult('✅ Instance available', 'success');
+                } else {
+                    addComponentResult('❌ Instance not available', 'error');
+                    return;
+                }
+                
+                // Test 2: Check if class is available
+                if (window[className]) {
+                    addComponentResult('✅ Class available', 'success');
+                } else {
+                    addComponentResult('❌ Class not available', 'error');
+                    return;
+                }
+                
+                // Test 3: Test instance methods
+                const instance = window[instanceName];
+                if (typeof instance.initialize === 'function') {
+                    addComponentResult('✅ initialize() method available', 'success');
+                } else {
+                    addComponentResult('❌ initialize() method not available', 'error');
+                }
+                
+                if (typeof instance.getStats === 'function') {
+                    addComponentResult('✅ getStats() method available', 'success');
+                } else {
+                    addComponentResult('❌ getStats() method not available', 'error');
+                }
+                
+                // Test 4: Test class constructor
+                try {
+                    const newInstance = new window[className]();
+                    addComponentResult('✅ New instance created successfully', 'success');
+                } catch (error) {
+                    addComponentResult(`❌ New instance creation failed: ${error.message}`, 'error');
+                }
+                
+            } catch (error) {
+                addComponentResult(`❌ Component test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function runComprehensiveTest() {
+            clearResults();
+            addResult('🚀 Starting comprehensive Genesis Engine fix test...', 'info');
+            
+            try {
+                // Test 1: Check all components are available
+                addResult('Test 1: Checking component availability...', 'info');
+                
+                const components = [
+                    { name: 'GenesisEngine', instance: 'GenesisEngine', class: 'GenesisEngineClass' },
+                    { name: 'Renderer', instance: 'Renderer', class: 'RendererClass' },
+                    { name: 'CameraController', instance: 'CameraController', class: 'CameraControllerClass' },
+                    { name: 'UIManager', instance: 'UIManager', class: 'UIManagerClass' },
+                    { name: 'AIConsciousness', instance: 'AIConsciousness', class: 'AIConsciousnessClass' },
+                    { name: 'ProceduralGenerationEngine', instance: 'ProceduralGenerationEngine', class: 'ProceduralGenerationEngineClass' },
+                    { name: 'UniverseManager', instance: 'UniverseManager', class: 'UniverseManagerClass' }
+                ];
+                
+                let allComponentsAvailable = true;
+                
+                for (const component of components) {
+                    if (window[component.instance] && window[component.class]) {
+                        addResult(`✅ ${component.name}: Instance and Class available`, 'success');
+                    } else {
+                        addResult(`❌ ${component.name}: Missing instance or class`, 'error');
+                        allComponentsAvailable = false;
+                    }
+                }
+                
+                if (!allComponentsAvailable) {
+                    addResult('❌ Some components are missing', 'error');
+                    return;
+                }
+                
+                // Test 2: Test GenesisEngine initialization
+                addResult('Test 2: Testing GenesisEngine initialization...', 'info');
+                
+                try {
+                    const engine = window.GenesisEngine;
+                    await engine.initialize();
+                    addResult('✅ GenesisEngine initialized successfully!', 'success');
+                } catch (error) {
+                    addResult(`❌ GenesisEngine initialization failed: ${error.message}`, 'error');
+                    addResult(`Error details: ${error.stack}`, 'error');
+                    return;
+                }
+                
+                // Test 3: Test individual components
+                addResult('Test 3: Testing individual components...', 'info');
+                
+                for (const component of components) {
+                    testComponent(component.name, component.instance, component.class);
+                }
+                
+                // Test 4: Test engine methods
+                addResult('Test 4: Testing engine methods...', 'info');
+                
+                const engine = window.GenesisEngine;
+                const methods = ['start', 'stop', 'getStats', 'destroy'];
+                
+                for (const method of methods) {
+                    if (typeof engine[method] === 'function') {
+                        addResult(`✅ engine.${method}() method available`, 'success');
+                    } else {
+                        addResult(`❌ engine.${method}() method not available`, 'error');
+                    }
+                }
+                
+                addResult('🎉 Comprehensive test completed successfully!', 'success');
+                
+            } catch (error) {
+                addResult(`❌ Comprehensive test failed with error: ${error.message}`, 'error');
+                addResult(`Error stack: ${error.stack}`, 'error');
+            }
+        }
+
+        // Auto-run test when page loads
+        window.addEventListener('load', function() {
+            setTimeout(runComprehensiveTest, 1000);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoulDustParticle Creation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        .warning { background: #5a5a2d; }
+    </style>
+</head>
+<body>
+    <h1>✨ SoulDustParticle Creation Test</h1>
+    <div id="results"></div>
+
+    <!-- Load Three.js first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Load dependencies -->
+    <script src="modules/core/Utils.js"></script>
+    <script src="modules/core/EventBus.js"></script>
+    <script src="modules/soul-dust/SoulDustParticle.js"></script>
+    
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+            console.log(message);
+        }
+
+        function testSoulDustCreation() {
+            log('🧪 Testing SoulDustParticle creation...', 'info');
+            
+            // Test 1: Check if THREE is available
+            if (typeof THREE === 'undefined') {
+                log('❌ THREE is not available', 'error');
+                return;
+            }
+            log('✅ THREE is available', 'success');
+            
+            // Test 2: Check if Utils is available and initialized
+            if (!window.Utils) {
+                log('❌ Utils not available', 'error');
+                return;
+            }
+            log('✅ Utils is available', 'success');
+            
+            if (!window.Utils.isInitialized) {
+                log('⚠️ Utils not initialized, trying to initialize...', 'warning');
+                try {
+                    window.Utils.initialize();
+                    log('✅ Utils initialized successfully', 'success');
+                } catch (error) {
+                    log(`❌ Utils initialization failed: ${error.message}`, 'error');
+                    return;
+                }
+            } else {
+                log('✅ Utils is already initialized', 'success');
+            }
+            
+            // Test 3: Check if EventBus is available
+            if (!window.EventBus) {
+                log('❌ EventBus not available', 'error');
+                return;
+            }
+            log('✅ EventBus is available', 'success');
+            
+            // Test 4: Check if SoulDustParticle is available
+            if (!window.SoulDustParticle) {
+                log('❌ SoulDustParticle not available', 'error');
+                return;
+            }
+            log('✅ SoulDustParticle is available', 'success');
+            
+            // Test 5: Test Utils methods that SoulDustParticle uses
+            try {
+                const uuid = window.Utils.generateUUID();
+                log(`✅ generateUUID works: ${uuid}`, 'success');
+            } catch (error) {
+                log(`❌ generateUUID failed: ${error.message}`, 'error');
+                return;
+            }
+            
+            try {
+                const spherePoint = window.Utils.randomPointInSphere(50);
+                log(`✅ randomPointInSphere works: x=${spherePoint.x.toFixed(3)}, y=${spherePoint.y.toFixed(3)}, z=${spherePoint.z.toFixed(3)}`, 'success');
+            } catch (error) {
+                log(`❌ randomPointInSphere failed: ${error.message}`, 'error');
+                return;
+            }
+            
+            try {
+                const spherePoint = window.Utils.randomPointOnSphere();
+                log(`✅ randomPointOnSphere works: x=${spherePoint.x.toFixed(3)}, y=${spherePoint.y.toFixed(3)}, z=${spherePoint.z.toFixed(3)}`, 'success');
+            } catch (error) {
+                log(`❌ randomPointOnSphere failed: ${error.message}`, 'error');
+                return;
+            }
+            
+            // Test 6: Create SoulDustParticle
+            try {
+                const audioData = {
+                    frequency: 440,
+                    amplitude: 0.5,
+                    spectralComplexity: 0.3,
+                    timestamp: performance.now(),
+                    buffer: new Float32Array(1024)
+                };
+                
+                log('🎵 Creating SoulDustParticle with audio data...', 'info');
+                const soulDustParticle = new window.SoulDustParticle(audioData);
+                
+                if (soulDustParticle && soulDustParticle.isInitialized) {
+                    log('✅ SoulDustParticle created successfully!', 'success');
+                    log(`   - ID: ${soulDustParticle.id}`, 'success');
+                    log(`   - Position: x=${soulDustParticle.position.x.toFixed(3)}, y=${soulDustParticle.position.y.toFixed(3)}, z=${soulDustParticle.position.z.toFixed(3)}`, 'success');
+                    log(`   - Velocity: x=${soulDustParticle.velocity.x.toFixed(3)}, y=${soulDustParticle.velocity.y.toFixed(3)}, z=${soulDustParticle.velocity.z.toFixed(3)}`, 'success');
+                    log(`   - Energy: ${soulDustParticle.initialEnergy.toFixed(3)}`, 'success');
+                    log(`   - Color: r=${soulDustParticle.color.r.toFixed(3)}, g=${soulDustParticle.color.g.toFixed(3)}, b=${soulDustParticle.color.b.toFixed(3)}`, 'success');
+                } else {
+                    log('❌ SoulDustParticle created but not properly initialized', 'error');
+                }
+            } catch (error) {
+                log(`❌ SoulDustParticle creation failed: ${error.message}`, 'error');
+                log(`   Stack trace: ${error.stack}`, 'error');
+            }
+            
+            log('🏁 SoulDustParticle creation test completed', 'info');
+        }
+        
+        // Run test after a short delay to ensure all components are loaded
+        setTimeout(testSoulDustCreation, 1500);
+    </script>
+</body>
+</html> 
