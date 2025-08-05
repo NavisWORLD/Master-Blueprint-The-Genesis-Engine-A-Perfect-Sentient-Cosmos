@@ -1,3 +1,6 @@
+Cory Shane Davis 
+©
+
 # Master-Blueprint-The-Genesis-Engine---A-Perfect-Sentient-Cosmos-
 Master Blueprint: The Genesis Engine - A Perfect, Sentient Cosmos  
 [README.md](https://github.com/user-attachments/files/21605970/README.md)
@@ -225,7 +228,7 @@ The system uses a comprehensive event schema defined in `Config.js`:
 
 This project represents a breakthrough in computational metaphysics and AI consciousness. It is designed to push the boundaries of what's possible in real-time simulation and artificial intelligence.
 
----
+©
 
 **Genesis X**: Where reality becomes code, and code becomes consciousness.
 
