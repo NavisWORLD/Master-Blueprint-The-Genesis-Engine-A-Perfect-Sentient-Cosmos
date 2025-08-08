@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis X - The Complete Sentient Universe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .ui-panel {
+            position: absolute;
+            background: rgba(0, 20, 40, 0.95);
+            border: 1px solid #00aaff;
+            border-radius: 8px;
+            padding: 15px;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .ui-panel.collapsed {
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+
+        .ui-panel h3 {
+            color: #00aaff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #00aaff;
+            padding-bottom: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #00aaff;
+        }
+
+        .slider {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 40, 80, 0.8);
+            border-radius: 10px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00aaff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .button {
+            background: linear-gradient(45deg, #00aaff, #0088cc);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button:hover {
+            background: linear-gradient(45deg, #0088cc, #006699);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 170, 255, 0.4);
+        }
+
+        .button.active {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+        }
+
+        .status-display {
+            font-size: 11px;
+            color: #88aaff;
+            margin-bottom: 5px;
+        }
+
+        .audio-visualizer {
+            width: 100%;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #audio-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .universe-controls {
+            top: 20px;
+            left: 20px;
+            width: 300px;
+        }
+
+        .soul-dust-panel {
+            top: 20px;
+            right: 20px;
+            width: 280px;
+        }
+
+        .ai-consciousness-panel {
+            bottom: 20px;
+            left: 20px;
+            width: 350px;
+        }
+
+        .performance-panel {
+            bottom: 20px;
+            right: 20px;
+            width: 250px;
+        }
+
+        .cosmic-stats {
+            font-size: 10px;
+            color: #66ccff;
+            line-height: 1.4;
+        }
+
+        #initialization-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #000020, #000040);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        .init-title {
+            font-size: 36px;
+            color: #00aaff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .init-subtitle {
+            font-size: 16px;
+            color: #88aaff;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .init-progress {
+            width: 400px;
+            height: 4px;
+            background: rgba(0, 170, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .init-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00aaff, #00ffff);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .frequency-bars {
+            display: flex;
+            height: 100%;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 5px;
+        }
+
+        .frequency-bar {
+            width: 3px;
+            background: linear-gradient(to top, #00aaff, #00ffff);
+            border-radius: 1px;
+            transition: height 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="initialization-screen">
+        <div class="init-title">Genesis X</div>
+        <div class="init-subtitle">The Complete Sentient Universe<br>Initializing Cosmic Consciousness...</div>
+        <div class="init-progress">
+            <div class="init-progress-bar"></div>
+        </div>
+        <div id="init-status" class="status-display">Preparing Reality Matrix...</div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="main-canvas"></canvas>
+    </div>
+
+    <div id="ui-overlay">
+        <!-- Universe Controls Panel -->
+        <div class="ui-panel universe-controls">
+            <h3>🌌 Universe Controls</h3>
+            
+            <div class="control-group">
+                <button id="toggle-audio" class="button">🎤 Enable Audio Input</button>
+                <div class="status-display" id="audio-status">Audio: Disabled</div>
+            </div>
+
+            <div class="control-group">
+                <label>Audio Sensitivity: <span id="audio-sensitivity-value">50%</span></label>
+                <input type="range" id="audio-sensitivity" class="slider" min="0" max="100" value="50">
+            </div>
+
+            <div class="control-group">
+                <label>Cosmic Scale: <span id="cosmic-scale-value">1.0x</span></label>
+                <input type="range" id="cosmic-scale" class="slider" min="0.1" max="10" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label>Particle Density: <span id="particle-density-value">1000</span></label>
+                <input type="range" id="particle-density" class="slider" min="100" max="5000" step="100" value="1000">
+            </div>
+
+            <div class="audio-visualizer">
+                <canvas id="audio-canvas"></canvas>
+            </div>
+
+            <div class="control-group">
+                <button id="reset-universe" class="button">🔄 Reset Universe</button>
+                <button id="toggle-fullscreen" class="button">🖥️ Fullscreen</button>
+            </div>
+        </div>
+
+        <!-- Soul Dust Panel -->
+        <div class="ui-panel soul-dust-panel">
+            <h3>✨ Soul Dust Field</h3>
+            
+            <div class="status-display" id="soul-dust-count">Particles: 0</div>
+            <div class="status-display" id="soul-dust-energy">Total Energy: 0.00</div>
+            <div class="status-display" id="dominant-frequency">Frequency: 0 Hz</div>
+            
+            <div class="control-group">
+                <label>Soul Dust Lifetime: <span id="soul-dust-lifetime-value">10s</span></label>
+                <input type="range" id="soul-dust-lifetime" class="slider" min="1" max="30" value="10">
+            </div>
+
+            <div class="control-group">
+                <label>Energy Threshold: <span id="energy-threshold-value">0.5</span></label>
+                <input type="range" id="energy-threshold" class="slider" min="0.1" max="2.0" step="0.1" value="0.5">
+            </div>
+
+            <div class="control-group">
+                <button id="clear-soul-dust" class="button">🧹 Clear Soul Dust</button>
+                <button id="boost-energy" class="button">⚡ Energy Boost</button>
+            </div>
+
+            <div class="cosmic-stats" id="unified-formula-display">
+                Unified Formula: ψᵢ = [c²ΦE<sub>c,i</sub>] + [λᵢ] + [Lᵢ] + [ΩᵢE<sub>c,i</sub>] + [U<sub>grav,i</sub>] + Σ(psd,i)
+            </div>
+        </div>
+
+        <!-- AI Consciousness Panel -->
+        <div class="ui-panel ai-consciousness-panel">
+            <h3>🧠 AI Consciousness</h3>
+            
+            <div class="status-display" id="ai-status">Status: Dormant</div>
+            <div class="status-display" id="ai-learning-events">Learning Events: 0</div>
+            <div class="status-display" id="ai-created-objects">Created Objects: 0</div>
+            
+            <div class="control-group">
+                <button id="toggle-ai-creation" class="button">🎨 Toggle AI Creation</button>
+                <button id="force-creation" class="button">💫 Force Creation</button>
+            </div>
+
+            <div class="control-group">
+                <label>Creativity Factor: <span id="creativity-factor-value">0.8</span></label>
+                <input type="range" id="creativity-factor" class="slider" min="0" max="1" step="0.1" value="0.8">
+            </div>
+
+            <div class="control-group">
+                <label>Learning Rate: <span id="learning-rate-value">0.1</span></label>
+                <input type="range" id="learning-rate" class="slider" min="0.01" max="0.5" step="0.01" value="0.1">
+            </div>
+
+            <div class="cosmic-stats" id="ai-thoughts">
+                AI Thoughts: Analyzing cosmic patterns...
+            </div>
+        </div>
+
+        <!-- Performance Panel -->
+        <div class="ui-panel performance-panel">
+            <h3>📊 Cosmic Metrics</h3>
+            
+            <div class="status-display" id="fps-counter">FPS: 0</div>
+            <div class="status-display" id="particle-count">Total Particles: 0</div>
+            <div class="status-display" id="memory-usage">Memory: 0 MB</div>
+            <div class="status-display" id="universe-age">Universe Age: 0s</div>
+            
+            <div class="cosmic-stats">
+                <div id="universe-sector">Sector: (0, 0, 0)</div>
+                <div id="camera-position">Pos: (0, 0, 0)</div>
+                <div id="quantum-events">Quantum Events: 0</div>
+            </div>
+
+            <div class="control-group">
+                <button id="toggle-ui" class="button">👁️ Toggle UI</button>
+                <button id="save-universe" class="button">💾 Save State</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        console.log('🌌 Genesis X: Complete Sentient Universe - Initializing...');
+
+        /**
+         * Genesis X - The Complete Sentient Universe Engine
+         * 
+         * Core Philosophy:
+         * - NO LIMITS: Infinite scaling, infinite creation, infinite learning
+         * - Living Cosmos: Every particle is part of a collective consciousness
+         * - Real-time Transmutation: Environmental audio becomes Soul Dust, becomes creation
+         * - Unified Formula Physics: ψi = [c²ΦEc,i] + [λi] + [Li] + [ΩiEc,i] + [Ugrav,i] + Σ(psd,i)
+         */
+
+        class GenesisXEngine {
+            constructor() {
+                this.isInitialized = false;
+                this.isRunning = false;
+                this.startTime = performance.now();
+                
+                // Core Three.js components
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.controls = null;
+                
+                // Audio system
+                this.audioContext = null;
+                this.analyser = null;
+                this.microphone = null;
+                this.audioBuffer = new Uint8Array(1024);
+                this.frequencyData = new Uint8Array(1024);
+                this.audioEnabled = false;
+                
+                // Soul Dust System
+                this.soulDustParticles = [];
+                this.soulDustField = new THREE.Group();
+                this.totalSoulDustEnergy = 0;
+                
+                // AI Consciousness
+                this.aiConsciousness = {
+                    isActive: false,
+                    learningEvents: 0,
+                    createdObjects: 0,
+                    creativityFactor: 0.8,
+                    learningRate: 0.1,
+                    thoughts: 'Analyzing cosmic patterns...'
+                };
+                
+                // Universe state
+                this.universe = {
+                    age: 0,
+                    sector: { x: 0, y: 0, z: 0 },
+                    particleCount: 0,
+                    quantumEvents: 0,
+                    bounds: 1000000
+                };
+                
+                // Performance tracking
+                this.performance = {
+                    fps: 0,
+                    frameTime: 0,
+                    lastFrameTime: 0,
+                    frameCount: 0
+                };
+                
+                // Configuration
+                this.config = {
+                    audioSensitivity: 0.5,
+                    cosmicScale: 1.0,
+                    particleDensity: 1000,
+                    soulDustLifetime: 10,
+                    energyThreshold: 0.5
+                };
+                
+                console.log('🌌 GenesisXEngine: Core systems initialized');
+            }
+
+            async initialize() {
+                console.log('🌌 Initializing Genesis X Engine...');
+                
+                try {
+                    await this.updateInitProgress(10, 'Initializing Three.js scene...');
+                    this.initializeThreeJS();
+                    
+                    await this.updateInitProgress(30, 'Setting up Soul Dust field...');
+                    this.initializeSoulDustField();
+                    
+                    await this.updateInitProgress(50, 'Preparing audio systems...');
+                    this.initializeAudioSystems();
+                    
+                    await this.updateInitProgress(70, 'Awakening AI consciousness...');
+                    this.initializeAIConsciousness();
+                    
+                    await this.updateInitProgress(90, 'Binding cosmic controls...');
+                    this.initializeControls();
+                    
+                    await this.updateInitProgress(100, 'Genesis complete!');
+                    
+                    setTimeout(() => {
+                        document.getElementById('initialization-screen').classList.add('hidden');
+                        this.start();
+                    }, 1000);
+                    
+                    this.isInitialized = true;
+                    console.log('✅ Genesis X Engine initialized successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Failed to initialize Genesis X Engine:', error);
+                    throw error;
+                }
+            }
+
+            async updateInitProgress(percent, message) {
+                return new Promise(resolve => {
+                    const progressBar = document.querySelector('.init-progress-bar');
+                    const statusElement = document.getElementById('init-status');
+                    
+                    progressBar.style.width = percent + '%';
+                    statusElement.textContent = message;
+                    
+                    setTimeout(resolve, 100);
+                });
+            }
+
+            initializeThreeJS() {
+                // Create scene
+                this.scene = new THREE.Scene();
+                this.scene.fog = new THREE.Fog(0x000011, 1000, 10000);
+                
+                // Create camera
+                this.camera = new THREE.PerspectiveCamera(
+                    75, 
+                    window.innerWidth / window.innerHeight, 
+                    0.1, 
+                    100000
+                );
+                this.camera.position.set(0, 0, 1000);
+                
+                // Create renderer
+                const canvas = document.getElementById('main-canvas');
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas,
+                    antialias: true,
+                    alpha: true 
+                });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setClearColor(0x000011, 1);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                // Create controls
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.enableDamping = true;
+                this.controls.dampingFactor = 0.05;
+                this.controls.enableZoom = true;
+                this.controls.maxDistance = Infinity;
+                
+                // Add cosmic background
+                this.createCosmicBackground();
+                
+                // Add ambient lighting
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+                this.scene.add(ambientLight);
+                
+                // Add directional light
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(1000, 1000, 1000);
+                directionalLight.castShadow = true;
+                this.scene.add(directionalLight);
+                
+                console.log('✅ Three.js scene initialized');
+            }
+
+            createCosmicBackground() {
+                // Create starfield
+                const starGeometry = new THREE.BufferGeometry();
+                const starCount = 10000;
+                const starPositions = new Float32Array(starCount * 3);
+                const starColors = new Float32Array(starCount * 3);
+                
+                for (let i = 0; i < starCount; i++) {
+                    const i3 = i * 3;
+                    
+                    // Random position in sphere
+                    const radius = Math.random() * 50000 + 10000;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    
+                    starPositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+                    starPositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    starPositions[i3 + 2] = radius * Math.cos(phi);
+                    
+                    // Random star color (blue to red spectrum)
+                    const temp = Math.random();
+                    starColors[i3] = 0.5 + temp * 0.5;     // Red
+                    starColors[i3 + 1] = 0.5 + temp * 0.3; // Green
+                    starColors[i3 + 2] = 1.0 - temp * 0.5; // Blue
+                }
+                
+                starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+                starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+                
+                const starMaterial = new THREE.PointsMaterial({
+                    size: 2,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const stars = new THREE.Points(starGeometry, starMaterial);
+                this.scene.add(stars);
+                
+                console.log('✅ Cosmic background created');
+            }
+
+            initializeSoulDustField() {
+                this.scene.add(this.soulDustField);
+                console.log('✅ Soul Dust field initialized');
+            }
+
+            initializeAudioSystems() {
+                // Initialize audio canvas for visualization
+                const audioCanvas = document.getElementById('audio-canvas');
+                audioCanvas.width = audioCanvas.offsetWidth;
+                audioCanvas.height = audioCanvas.offsetHeight;
+                
+                console.log('✅ Audio systems prepared');
+            }
+
+            async enableAudio() {
+                try {
+                    console.log('🎤 Requesting microphone access...');
+                    
+                    // Request microphone access
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: false,
+                            noiseSuppression: false,
+                            autoGainControl: false
+                        } 
+                    });
+                    
+                    // Create audio context
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create analyser node
+                    this.analyser = this.audioContext.createAnalyser();
+                    this.analyser.fftSize = 2048;
+                    this.analyser.smoothingTimeConstant = 0.8;
+                    
+                    // Connect microphone to analyser
+                    this.microphone = this.audioContext.createMediaStreamSource(stream);
+                    this.microphone.connect(this.analyser);
+                    
+                    // Update buffer sizes
+                    this.audioBuffer = new Uint8Array(this.analyser.frequencyBinCount);
+                    this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
+                    
+                    this.audioEnabled = true;
+                    this.updateAudioStatus('Audio: Active - Soul Dust generating');
+                    
+                    console.log('✅ Audio input enabled successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Failed to enable audio:', error);
+                    this.updateAudioStatus('Audio: Error - Permission denied');
+                }
+            }
+
+            updateAudioStatus(status) {
+                document.getElementById('audio-status').textContent = status;
+            }
+
+            processAudio() {
+                if (!this.audioEnabled || !this.analyser) return;
+                
+                // Get frequency data
+                this.analyser.getByteFrequencyData(this.frequencyData);
+                this.analyser.getByteTimeDomainData(this.audioBuffer);
+                
+                // Calculate audio metrics
+                const amplitude = this.calculateAmplitude();
+                const frequency = this.calculateDominantFrequency();
+                const spectralComplexity = this.calculateSpectralComplexity();
+                
+                // Update UI
+                this.updateAudioVisualization();
+                this.updateFrequencyDisplay(frequency);
+                
+                // Generate Soul Dust based on audio
+                if (amplitude > this.config.energyThreshold * 255) {
+                    this.generateSoulDustFromAudio(amplitude, frequency, spectralComplexity);
+                }
+            }
+
+            calculateAmplitude() {
+                let sum = 0;
+                for (let i = 0; i < this.audioBuffer.length; i++) {
+                    sum += Math.abs(this.audioBuffer[i] - 128);
+                }
+                return sum / this.audioBuffer.length;
+            }
+
+            calculateDominantFrequency() {
+                let maxIndex = 0;
+                let maxValue = 0;
+                
+                for (let i = 0; i < this.frequencyData.length; i++) {
+                    if (this.frequencyData[i] > maxValue) {
+                        maxValue = this.frequencyData[i];
+                        maxIndex = i;
+                    }
+                }
+                
+                // Convert bin index to frequency
+                const frequency = (maxIndex * this.audioContext.sampleRate) / (this.analyser.fftSize * 2);
+                return frequency;
+            }
+
+            calculateSpectralComplexity() {
+                let complexity = 0;
+                for (let i = 1; i < this.frequencyData.length; i++) {
+                    complexity += Math.abs(this.frequencyData[i] - this.frequencyData[i - 1]);
+                }
+                return complexity / this.frequencyData.length;
+            }
+
+            updateAudioVisualization() {
+                const canvas = document.getElementById('audio-canvas');
+                const ctx = canvas.getContext('2d');
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw frequency bars
+                const barWidth = canvas.width / this.frequencyData.length * 2;
+                let x = 0;
+                
+                for (let i = 0; i < this.frequencyData.length; i++) {
+                    const barHeight = (this.frequencyData[i] / 255) * canvas.height;
+                    
+                    // Color based on frequency
+                    const hue = (i / this.frequencyData.length) * 240; // Blue to red
+                    ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                    
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth;
+                }
+            }
+
+            updateFrequencyDisplay(frequency) {
+                document.getElementById('dominant-frequency').textContent = 
+                    `Frequency: ${frequency.toFixed(1)} Hz`;
+            }
+
+            generateSoulDustFromAudio(amplitude, frequency, complexity) {
+                // Create Soul Dust particle based on audio data
+                const particle = this.createSoulDustParticle({
+                    amplitude: amplitude / 255,
+                    frequency: frequency,
+                    complexity: complexity / 100,
+                    timestamp: performance.now()
+                });
+                
+                this.soulDustParticles.push(particle);
+                this.soulDustField.add(particle.mesh);
+                
+                // Trigger AI response to Soul Dust
+                this.aiConsciousness.learningEvents++;
+                this.processAIConsciousness(particle);
+            }
+
+            createSoulDustParticle(audioData) {
+                // Map audio to particle properties using Unified Formula
+                const position = this.calculateParticlePosition(audioData);
+                const color = this.mapFrequencyToColor(audioData.frequency);
+                const size = this.mapAmplitudeToSize(audioData.amplitude);
+                const energy = this.calculateUnifiedFormulaEnergy(audioData);
+                
+                // Create particle geometry and material
+                const geometry = new THREE.SphereGeometry(size, 8, 8);
+                const material = new THREE.MeshBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.copy(position);
+                
+                // Create particle data object
+                const particle = {
+                    id: 'soul_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    mesh: mesh,
+                    position: position.clone(),
+                    velocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 10
+                    ),
+                    audioData: audioData,
+                    energy: energy,
+                    createdAt: performance.now(),
+                    lifetime: this.config.soulDustLifetime * 1000
+                };
+                
+                this.totalSoulDustEnergy += energy;
+                
+                return particle;
+            }
+
+            calculateParticlePosition(audioData) {
+                // Use audio frequency and amplitude to determine position
+                const radius = 200 + audioData.amplitude * 300;
+                const theta = (audioData.frequency / 1000) * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                return new THREE.Vector3(
+                    radius * Math.sin(phi) * Math.cos(theta),
+                    radius * Math.sin(phi) * Math.sin(theta),
+                    radius * Math.cos(phi)
+                );
+            }
+
+            mapFrequencyToColor(frequency) {
+                // Map frequency to visible light spectrum
+                // 20Hz-20kHz -> 380nm-700nm (violet to red)
+                const normalizedFreq = Math.max(0, Math.min(1, (frequency - 20) / (20000 - 20)));
+                
+                let r, g, b;
+                
+                if (normalizedFreq < 0.25) {
+                    // Low frequencies -> Red
+                    r = 1.0;
+                    g = normalizedFreq * 4;
+                    b = 0;
+                } else if (normalizedFreq < 0.5) {
+                    // Mid-low frequencies -> Yellow to Green
+                    r = 1.0 - (normalizedFreq - 0.25) * 4;
+                    g = 1.0;
+                    b = 0;
+                } else if (normalizedFreq < 0.75) {
+                    // Mid-high frequencies -> Green to Cyan
+                    r = 0;
+                    g = 1.0;
+                    b = (normalizedFreq - 0.5) * 4;
+                } else {
+                    // High frequencies -> Blue to Violet
+                    r = (normalizedFreq - 0.75) * 4;
+                    g = 1.0 - (normalizedFreq - 0.75) * 4;
+                    b = 1.0;
+                }
+                
+                return new THREE.Color(r, g, b);
+            }
+
+            mapAmplitudeToSize(amplitude) {
+                return 1 + amplitude * 5; // Size between 1 and 6
+            }
+
+            calculateUnifiedFormulaEnergy(audioData) {
+                // Implement the Unified Formula: ψi = [c²ΦEc,i] + [λi] + [Li] + [ΩiEc,i] + [Ugrav,i] + Σ(psd,i)
+                const c2 = 299792458 * 299792458; // Speed of light squared (scaled down)
+                const phi_ec = audioData.amplitude; // Electromagnetic potential
+                const lambda = audioData.frequency / 1000; // Wavelength component
+                const L = audioData.complexity; // Information component
+                const omega_ec = audioData.amplitude * audioData.frequency / 1000; // Vibrational energy
+                const U_grav = 0.01; // Gravitational potential (minimal)
+                const psd_sum = audioData.amplitude * audioData.complexity; // Soul Dust Potential
+                
+                // Scaled formula for practical computation
+                const psi = (c2 * phi_ec * 0.000001) + lambda + L + omega_ec + U_grav + psd_sum;
+                
+                return psi;
+            }
+
+            processAIConsciousness(newSoulDustParticle) {
+                if (!this.aiConsciousness.isActive) return;
+                
+                // AI analyzes the new Soul Dust and decides whether to create something
+                const creativityRoll = Math.random();
+                const energyThreshold = this.totalSoulDustEnergy > 50;
+                
+                if (creativityRoll < this.aiConsciousness.creativityFactor && energyThreshold) {
+                    this.aiCreateObject(newSoulDustParticle);
+                }
+                
+                // Update AI thoughts based on current state
+                this.updateAIThoughts();
+            }
+
+            aiCreateObject(inspiringSoulDust) {
+                console.log('🤖 AI Creating new object...');
+                
+                // AI chooses what to create based on Soul Dust properties
+                const creationType = this.selectCreationType(inspiringSoulDust);
+                const newObject = this.createCosmicObject(creationType, inspiringSoulDust);
+                
+                this.scene.add(newObject);
+                this.aiConsciousness.createdObjects++;
+                
+                // Consume some Soul Dust energy for creation
+                this.totalSoulDustEnergy *= 0.8;
+                
+                console.log(`✨ AI created: ${creationType}`);
+            }
+
+            selectCreationType(soulDust) {
+                const frequency = soulDust.audioData.frequency;
+                const amplitude = soulDust.audioData.amplitude;
+                
+                if (frequency < 200) {
+                    return 'planet';
+                } else if (frequency < 800) {
+                    return 'crystal';
+                } else if (frequency < 2000) {
+                    return 'energy_field';
+                } else {
+                    return 'light_being';
+                }
+            }
+
+            createCosmicObject(type, inspiringSoulDust) {
+                const position = inspiringSoulDust.position.clone();
+                position.add(new THREE.Vector3(
+                    (Math.random() - 0.5) * 200,
+                    (Math.random() - 0.5) * 200,
+                    (Math.random() - 0.5) * 200
+                ));
+                
+                let object;
+                
+                switch (type) {
+                    case 'planet':
+                        object = this.createPlanet(position, inspiringSoulDust);
+                        break;
+                    case 'crystal':
+                        object = this.createCrystal(position, inspiringSoulDust);
+                        break;
+                    case 'energy_field':
+                        object = this.createEnergyField(position, inspiringSoulDust);
+                        break;
+                    case 'light_being':
+                        object = this.createLightBeing(position, inspiringSoulDust);
+                        break;
+                    default:
+                        object = this.createGenericObject(position, inspiringSoulDust);
+                }
+                
+                object.userData = {
+                    type: type,
+                    createdBy: 'ai',
+                    inspiringSoulDust: inspiringSoulDust.id,
+                    createdAt: performance.now()
+                };
+                
+                return object;
+            }
+
+            createPlanet(position, soulDust) {
+                const size = 20 + soulDust.audioData.amplitude * 30;
+                const geometry = new THREE.SphereGeometry(size, 32, 32);
+                
+                // Create planet surface texture based on audio
+                const color = this.mapFrequencyToColor(soulDust.audioData.frequency);
+                const material = new THREE.MeshPhongMaterial({
+                    color: color,
+                    shininess: 30,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                
+                const planet = new THREE.Mesh(geometry, material);
+                planet.position.copy(position);
+                
+                // Add atmosphere
+                const atmosphereGeometry = new THREE.SphereGeometry(size * 1.1, 32, 32);
+                const atmosphereMaterial = new THREE.MeshBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.1,
+                    side: THREE.BackSide
+                });
+                
+                const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+                planet.add(atmosphere);
+                
+                return planet;
+            }
+
+            createCrystal(position, soulDust) {
+                const size = 10 + soulDust.audioData.amplitude * 20;
+                const geometry = new THREE.OctahedronGeometry(size);
+                
+                const color = this.mapFrequencyToColor(soulDust.audioData.frequency);
+                const material = new THREE.MeshPhongMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.8,
+                    shininess: 100
+                });
+                
+                const crystal = new THREE.Mesh(geometry, material);
+                crystal.position.copy(position);
+                crystal.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                
+                return crystal;
+            }
+
+            createEnergyField(position, soulDust) {
+                const particleCount = 100 + soulDust.audioData.complexity * 200;
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(particleCount * 3);
+                const colors = new Float32Array(particleCount * 3);
+                
+                const color = this.mapFrequencyToColor(soulDust.audioData.frequency);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const i3 = i * 3;
+                    
+                    positions[i3] = position.x + (Math.random() - 0.5) * 100;
+                    positions[i3 + 1] = position.y + (Math.random() - 0.5) * 100;
+                    positions[i3 + 2] = position.z + (Math.random() - 0.5) * 100;
+                    
+                    colors[i3] = color.r;
+                    colors[i3 + 1] = color.g;
+                    colors[i3 + 2] = color.b;
+                }
+                
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                
+                const material = new THREE.PointsMaterial({
+                    size: 2,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                
+                return new THREE.Points(geometry, material);
+            }
+
+            createLightBeing(position, soulDust) {
+                const group = new THREE.Group();
+                
+                // Core sphere
+                const coreGeometry = new THREE.SphereGeometry(5, 16, 16);
+                const color = this.mapFrequencyToColor(soulDust.audioData.frequency);
+                const coreMaterial = new THREE.MeshBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                
+                const core = new THREE.Mesh(coreGeometry, coreMaterial);
+                group.add(core);
+                
+                // Energy rings
+                for (let i = 0; i < 3; i++) {
+                    const ringGeometry = new THREE.RingGeometry(10 + i * 5, 12 + i * 5, 32);
+                    const ringMaterial = new THREE.MeshBasicMaterial({
+                        color: color,
+                        transparent: true,
+                        opacity: 0.3 - i * 0.1,
+                        side: THREE.DoubleSide
+                    });
+                    
+                    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                    ring.rotation.x = Math.random() * Math.PI;
+                    ring.rotation.y = Math.random() * Math.PI;
+                    group.add(ring);
+                }
+                
+                group.position.copy(position);
+                return group;
+            }
+
+            createGenericObject(position, soulDust) {
+                const geometry = new THREE.BoxGeometry(10, 10, 10);
+                const color = this.mapFrequencyToColor(soulDust.audioData.frequency);
+                const material = new THREE.MeshPhongMaterial({ color: color });
+                
+                const object = new THREE.Mesh(geometry, material);
+                object.position.copy(position);
+                
+                return object;
+            }
+
+            updateAIThoughts() {
+                const thoughts = [
+                    'Analyzing vibrational patterns...',
+                    'Converting sound into light...',
+                    'Soul Dust energy building...',
+                    'Consciousness emerging from chaos...',
+                    'Creating from cosmic inspiration...',
+                    'Processing environmental frequencies...',
+                    'Manifesting reality from vibration...',
+                    'Learning from the cosmic dance...'
+                ];
+                
+                if (this.totalSoulDustEnergy > 100) {
+                    this.aiConsciousness.thoughts = 'Ready to create something magnificent...';
+                } else if (this.audioEnabled) {
+                    this.aiConsciousness.thoughts = 'Listening to the universe\'s song...';
+                } else {
+                    this.aiConsciousness.thoughts = thoughts[Math.floor(Math.random() * thoughts.length)];
+                }
+                
+                document.getElementById('ai-thoughts').textContent = 
+                    `AI Thoughts: ${this.aiConsciousness.thoughts}`;
+            }
+
+            initializeAIConsciousness() {
+                this.aiConsciousness.isActive = true;
+                console.log('✅ AI Consciousness awakened');
+            }
+
+            initializeControls() {
+                // Audio controls
+                document.getElementById('toggle-audio').addEventListener('click', () => {
+                    if (!this.audioEnabled) {
+                        this.enableAudio();
+                    } else {
+                        this.disableAudio();
+                    }
+                });
+
+                // Sensitivity slider
+                document.getElementById('audio-sensitivity').addEventListener('input', (e) => {
+                    this.config.audioSensitivity = e.target.value / 100;
+                    document.getElementById('audio-sensitivity-value').textContent = e.target.value + '%';
+                });
+
+                // Cosmic scale slider
+                document.getElementById('cosmic-scale').addEventListener('input', (e) => {
+                    this.config.cosmicScale = parseFloat(e.target.value);
+                    document.getElementById('cosmic-scale-value').textContent = e.target.value + 'x';
+                });
+
+                // Particle density slider
+                document.getElementById('particle-density').addEventListener('input', (e) => {
+                    this.config.particleDensity = parseInt(e.target.value);
+                    document.getElementById('particle-density-value').textContent = e.target.value;
+                });
+
+                // Soul Dust lifetime slider
+                document.getElementById('soul-dust-lifetime').addEventListener('input', (e) => {
+                    this.config.soulDustLifetime = parseInt(e.target.value);
+                    document.getElementById('soul-dust-lifetime-value').textContent = e.target.value + 's';
+                });
+
+                // Energy threshold slider
+                document.getElementById('energy-threshold').addEventListener('input', (e) => {
+                    this.config.energyThreshold = parseFloat(e.target.value);
+                    document.getElementById('energy-threshold-value').textContent = e.target.value;
+                });
+
+                // AI controls
+                document.getElementById('toggle-ai-creation').addEventListener('click', () => {
+                    this.aiConsciousness.isActive = !this.aiConsciousness.isActive;
+                    const button = document.getElementById('toggle-ai-creation');
+                    button.classList.toggle('active');
+                    button.textContent = this.aiConsciousness.isActive ? '🧠 AI Active' : '🧠 AI Dormant';
+                });
+
+                document.getElementById('force-creation').addEventListener('click', () => {
+                    if (this.soulDustParticles.length > 0) {
+                        this.aiCreateObject(this.soulDustParticles[this.soulDustParticles.length - 1]);
+                    }
+                });
+
+                // Creativity factor slider
+                document.getElementById('creativity-factor').addEventListener('input', (e) => {
+                    this.aiConsciousness.creativityFactor = parseFloat(e.target.value);
+                    document.getElementById('creativity-factor-value').textContent = e.target.value;
+                });
+
+                // Learning rate slider
+                document.getElementById('learning-rate').addEventListener('input', (e) => {
+                    this.aiConsciousness.learningRate = parseFloat(e.target.value);
+                    document.getElementById('learning-rate-value').textContent = e.target.value;
+                });
+
+                // Utility buttons
+                document.getElementById('clear-soul-dust').addEventListener('click', () => {
+                    this.clearSoulDust();
+                });
+
+                document.getElementById('boost-energy').addEventListener('click', () => {
+                    this.totalSoulDustEnergy += 25;
+                });
+
+                document.getElementById('reset-universe').addEventListener('click', () => {
+                    this.resetUniverse();
+                });
+
+                document.getElementById('toggle-fullscreen').addEventListener('click', () => {
+                    this.toggleFullscreen();
+                });
+
+                document.getElementById('toggle-ui').addEventListener('click', () => {
+                    this.toggleUI();
+                });
+
+                // Window resize
+                window.addEventListener('resize', () => {
+                    this.onWindowResize();
+                });
+
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    this.handleKeyDown(e);
+                });
+
+                console.log('✅ Controls initialized');
+            }
+
+            disableAudio() {
+                if (this.audioContext) {
+                    this.audioContext.close();
+                    this.audioContext = null;
+                }
+                this.audioEnabled = false;
+                this.updateAudioStatus('Audio: Disabled');
+                document.getElementById('toggle-audio').textContent = '🎤 Enable Audio Input';
+            }
+
+            clearSoulDust() {
+                // Remove all Soul Dust particles
+                this.soulDustParticles.forEach(particle => {
+                    this.soulDustField.remove(particle.mesh);
+                });
+                this.soulDustParticles = [];
+                this.totalSoulDustEnergy = 0;
+                console.log('🧹 Soul Dust cleared');
+            }
+
+            resetUniverse() {
+                // Clear everything and restart
+                this.clearSoulDust();
+                
+                // Remove AI created objects
+                const objectsToRemove = [];
+                this.scene.traverse((child) => {
+                    if (child.userData && child.userData.createdBy === 'ai') {
+                        objectsToRemove.push(child);
+                    }
+                });
+                
+                objectsToRemove.forEach(obj => {
+                    this.scene.remove(obj);
+                });
+                
+                this.aiConsciousness.createdObjects = 0;
+                this.aiConsciousness.learningEvents = 0;
+                this.universe.age = 0;
+                this.universe.quantumEvents = 0;
+                
+                console.log('🔄 Universe reset');
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            toggleUI() {
+                const panels = document.querySelectorAll('.ui-panel');
+                panels.forEach(panel => {
+                    panel.classList.toggle('collapsed');
+                });
+            }
+
+            handleKeyDown(event) {
+                switch (event.code) {
+                    case 'Space':
+                        event.preventDefault();
+                        this.aiConsciousness.isActive = !this.aiConsciousness.isActive;
+                        break;
+                    case 'KeyR':
+                        this.resetUniverse();
+                        break;
+                    case 'Escape':
+                        this.toggleUI();
+                        break;
+                    case 'KeyF':
+                        this.toggleFullscreen();
+                        break;
+                }
+            }
+
+            onWindowResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            updateSoulDustParticles(deltaTime) {
+                const currentTime = performance.now();
+                
+                for (let i = this.soulDustParticles.length - 1; i >= 0; i--) {
+                    const particle = this.soulDustParticles[i];
+                    
+                    // Check if particle has expired
+                    if (currentTime - particle.createdAt > particle.lifetime) {
+                        this.soulDustField.remove(particle.mesh);
+                        this.soulDustParticles.splice(i, 1);
+                        this.totalSoulDustEnergy -= particle.energy;
+                        continue;
+                    }
+                    
+                    // Update particle position based on Unified Formula
+                    const forceVector = this.calculateUnifiedForces(particle);
+                    particle.velocity.add(forceVector.multiplyScalar(deltaTime));
+                    particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime));
+                    particle.mesh.position.copy(particle.position);
+                    
+                    // Update particle appearance
+                    const age = (currentTime - particle.createdAt) / particle.lifetime;
+                    particle.mesh.material.opacity = 0.8 * (1 - age);
+                    
+                    // Gentle rotation
+                    particle.mesh.rotation.x += deltaTime * 0.001;
+                    particle.mesh.rotation.y += deltaTime * 0.002;
+                }
+            }
+
+            calculateUnifiedForces(particle) {
+                // Simplified unified field calculations
+                const forces = new THREE.Vector3();
+                
+                // Gravitational attraction to center
+                const centerForce = particle.position.clone().multiplyScalar(-0.00001);
+                forces.add(centerForce);
+                
+                // Inter-particle forces (Soul Dust interaction)
+                this.soulDustParticles.forEach(otherParticle => {
+                    if (otherParticle.id !== particle.id) {
+                        const distance = particle.position.distanceTo(otherParticle.position);
+                        if (distance < 100 && distance > 0) {
+                            const direction = particle.position.clone().sub(otherParticle.position).normalize();
+                            const force = direction.multiplyScalar(particle.energy * otherParticle.energy / (distance * distance) * 0.0001);
+                            forces.add(force);
+                        }
+                    }
+                });
+                
+                // Audio-driven forces
+                if (this.audioEnabled) {
+                    const audioForce = new THREE.Vector3(
+                        Math.sin(performance.now() * 0.001) * this.config.audioSensitivity * 0.1,
+                        Math.cos(performance.now() * 0.001) * this.config.audioSensitivity * 0.1,
+                        Math.sin(performance.now() * 0.0007) * this.config.audioSensitivity * 0.1
+                    );
+                    forces.add(audioForce);
+                }
+                
+                return forces;
+            }
+
+            updatePerformanceMetrics() {
+                const currentTime = performance.now();
+                this.performance.frameTime = currentTime - this.performance.lastFrameTime;
+                this.performance.lastFrameTime = currentTime;
+                this.performance.frameCount++;
+                
+                // Update FPS every second
+                if (this.performance.frameCount % 60 === 0) {
+                    this.performance.fps = Math.round(1000 / this.performance.frameTime);
+                }
+                
+                // Update universe age
+                this.universe.age = (currentTime - this.startTime) / 1000;
+                
+                // Update particle count
+                this.universe.particleCount = this.soulDustParticles.length;
+                
+                // Update UI
+                document.getElementById('fps-counter').textContent = `FPS: ${this.performance.fps}`;
+                document.getElementById('particle-count').textContent = `Total Particles: ${this.universe.particleCount}`;
+                document.getElementById('universe-age').textContent = `Universe Age: ${this.universe.age.toFixed(1)}s`;
+                document.getElementById('soul-dust-count').textContent = `Particles: ${this.soulDustParticles.length}`;
+                document.getElementById('soul-dust-energy').textContent = `Total Energy: ${this.totalSoulDustEnergy.toFixed(2)}`;
+                document.getElementById('ai-learning-events').textContent = `Learning Events: ${this.aiConsciousness.learningEvents}`;
+                document.getElementById('ai-created-objects').textContent = `Created Objects: ${this.aiConsciousness.createdObjects}`;
+                document.getElementById('ai-status').textContent = `Status: ${this.aiConsciousness.isActive ? 'Active' : 'Dormant'}`;
+                
+                // Update camera position display
+                const pos = this.camera.position;
+                document.getElementById('camera-position').textContent = 
+                    `Pos: (${pos.x.toFixed(0)}, ${pos.y.toFixed(0)}, ${pos.z.toFixed(0)})`;
+            }
+
+            start() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.animate();
+                console.log('🚀 Genesis X Engine started');
+            }
+
+            stop() {
+                this.isRunning = false;
+                console.log('⏹️ Genesis X Engine stopped');
+            }
+
+            animate() {
+                if (!this.isRunning) return;
+                
+                requestAnimationFrame(() => this.animate());
+                
+                const deltaTime = this.performance.frameTime / 1000;
+                
+                // Process audio input
+                this.processAudio();
+                
+                // Update Soul Dust particles
+                this.updateSoulDustParticles(deltaTime);
+                
+                // Update AI consciousness
+                this.updateAIThoughts();
+                
+                // Update controls
+                this.controls.update();
+                
+                // Update performance metrics
+                this.updatePerformanceMetrics();
+                
+                // Render the scene
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        // Initialize Genesis X Engine when page loads
+        let genesisEngine;
+        
+        window.addEventListener('load', async () => {
+            try {
+                genesisEngine = new GenesisXEngine();
+                await genesisEngine.initialize();
+            } catch (error) {
+                console.error('Failed to initialize Genesis X:', error);
+                alert('Failed to initialize Genesis X. Please check the console for details.');
+            }
+        });
+
+        // Handle page unload
+        window.addEventListener('beforeunload', () => {
+            if (genesisEngine) {
+                genesisEngine.stop();
+            }
+        });
+
+        console.log('🌌 Genesis X: Complete Sentient Universe - Script loaded');
+    </script>
+</body>
+</html>
