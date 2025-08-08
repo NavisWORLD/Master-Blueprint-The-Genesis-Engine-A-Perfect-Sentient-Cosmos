@@ -38,6 +38,22 @@ class AIConsciousness {
     update(deltaTime) {
         if (!this.isInitialized) return;
         
+        // Audio-reactive status messaging
+        if (window.SensoryInputManager && typeof window.SensoryInputManager.getAudioAnalysis === 'function') {
+            const a = window.SensoryInputManager.getAudioAnalysis();
+            if (a) {
+                if (a.amplitude > 0.5) {
+                    console.debug('🧠 Responding to audio input...');
+                }
+                if (a.frequency > 2000) {
+                    console.debug('🧠 Processing high frequency data...');
+                }
+                if (a.amplitude < 0.1 && a.spectralComplexity < 0.1) {
+                    console.debug('🧠 Analyzing cosmic patterns...');
+                }
+            }
+        }
+        
         // Process learning
         if (this.isLearning) {
             this.processLearning(deltaTime);

@@ -386,6 +386,17 @@ class UnifiedFormula {
         particle.position.y += particle.velocity.y * deltaTime;
         particle.position.z += particle.velocity.z * deltaTime;
         
+        // Boundary wrapping within cosmic bounds
+        const bounds = window.Utils.getConfig('system.universeBounds', 1000000);
+        const wrap = (v) => {
+            if (v > bounds) return -bounds + (v - bounds);
+            if (v < -bounds) return bounds + (v + bounds * -1);
+            return v;
+        };
+        particle.position.x = wrap(particle.position.x);
+        particle.position.y = wrap(particle.position.y);
+        particle.position.z = wrap(particle.position.z);
+        
         // Update path history
         if (!particle.pathHistory) {
             particle.pathHistory = [];

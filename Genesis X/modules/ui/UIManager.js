@@ -409,12 +409,34 @@ class UIManager {
 
     clearSoulDust() {
         // Clear soul dust particles
-        console.log('🧹 Clearing Soul Dust');
+        if (window.GenesisEngine && Array.isArray(window.GenesisEngine.soulDustField)) {
+            window.GenesisEngine.soulDustField.length = 0;
+            console.log('🧹 Soul Dust cleared');
+        } else if (window.GenesisEngineApp && typeof window.GenesisEngineApp.clearSoulDust === 'function') {
+            window.GenesisEngineApp.clearSoulDust();
+        } else {
+            console.log('🧹 Clearing Soul Dust (no engine field found)');
+        }
     }
 
     boostEnergy() {
-        // Boost energy
-        console.log('⚡ Boosting Energy');
+        // Boost energy by injecting high-energy Soul Dust particles
+        if (window.GenesisEngine && Array.isArray(window.GenesisEngine.soulDustField) && window.SoulDustParticle) {
+            for (let i = 0; i < 20; i++) {
+                const audioData = {
+                    frequency: 1000 + Math.random() * 2000,
+                    amplitude: 0.9 + Math.random() * 0.1,
+                    spectralComplexity: 0.8 + Math.random() * 0.2,
+                    timestamp: performance.now()
+                };
+                window.GenesisEngine.soulDustField.push(new window.SoulDustParticle(audioData));
+            }
+            console.log('⚡ Energy boosted');
+        } else if (window.GenesisEngineApp && typeof window.GenesisEngineApp.boostEnergy === 'function') {
+            window.GenesisEngineApp.boostEnergy();
+        } else {
+            console.log('⚡ Boosting Energy (no engine field found)');
+        }
     }
 
     toggleAICreation() {

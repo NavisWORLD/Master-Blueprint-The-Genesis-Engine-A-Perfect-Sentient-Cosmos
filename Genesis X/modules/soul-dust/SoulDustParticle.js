@@ -196,13 +196,24 @@ class SoulDustParticle {
      * @returns {Object} - RGB color object
      */
     calculateColor() {
-        // Safety check for Utils availability
-        if (!window.Utils || typeof window.Utils.frequencyToRGB !== 'function') {
-            console.warn('⚠️ Utils.frequencyToRGB not available, using fallback color');
-            return { r: 1, g: 0.8, b: 0.6 }; // Default warm color
-        }
-        
-        return window.Utils.frequencyToRGB(this.sourceFrequency);
+        // Prefer explicit audio-reactive mapping:
+        // - Low frequencies → Red high
+        // - High frequencies → Green high
+        // - Amplitude → Blue component
+        const minF = 20;
+        const maxF = 20000;
+        const freq = Math.max(minF, Math.min(maxF, this.sourceFrequency || 440));
+
+        // Use logarithmic perception mapping for frequency normalization
+        const logMin = Math.log10(minF);
+        const logMax = Math.log10(maxF);
+        const norm = (Math.log10(freq) - logMin) / (logMax - logMin); // 0..1
+
+        const red = window.Utils ? window.Utils.clamp(1.0 - norm, 0, 1) : (1.0 - norm);
+        const green = window.Utils ? window.Utils.clamp(norm, 0, 1) : norm;
+        const blue = window.Utils ? window.Utils.clamp(this.sourceAmplitude || 0, 0, 1) : (this.sourceAmplitude || 0);
+
+        return { r: red, g: green, b: blue };
     }
 
     /**
@@ -329,6 +340,26 @@ class SoulDustParticle {
         // Update physics using UnifiedFormula (Formula of Creation integration)
         window.UnifiedFormula.updateParticle(this, universe, soulDustField, deltaTime);
         
+        // Audio-reactive motion boost (live amplitude influences speed)
+        if (window.SensoryInputManager && typeof window.SensoryInputManager.getAudioAnalysis === 'function') {
+            const a = window.SensoryInputManager.getAudioAnalysis();
+            if (a) {
+                const sensitivity = window.Utils.getConfig('audio.influence.sensitivity', 1.0);
+                const affect = window.Utils.getConfig('audio.influence.affectSoulDust', true);
+                if (affect) {
+                    const extraFactor = a.amplitude * 0.2 * sensitivity; // gentle boost
+                    // position += velocity * deltaTime * extraFactor
+                    if (typeof this.position.addScaledVector === 'function') {
+                        this.position.addScaledVector(this.velocity, deltaTime * extraFactor);
+                    } else {
+                        this.position.x += this.velocity.x * deltaTime * extraFactor;
+                        this.position.y += this.velocity.y * deltaTime * extraFactor;
+                        this.position.z += this.velocity.z * deltaTime * extraFactor;
+                    }
+                }
+            }
+        }
+        
         // Update visual properties (Formula of Creation: energy → visual)
         this.updateVisualProperties();
         
@@ -364,13 +395,31 @@ class SoulDustParticle {
         this.brightness = this.calculateBrightness();
         this.size = this.calculateSize();
         
-        // Update color based on energy (Formula of Creation: energy → color intensity)
+        // Live audio-reactive color update
+        let baseColor = this.color;
+        if (window.SensoryInputManager && typeof window.SensoryInputManager.getAudioAnalysis === 'function') {
+            const a = window.SensoryInputManager.getAudioAnalysis();
+            if (a) {
+                // Reuse the same mapping used at creation time (freq→R/G, amp→B)
+                const minF = 20;
+                const maxF = 20000;
+                const freq = Math.max(minF, Math.min(maxF, a.frequency || this.sourceFrequency || 440));
+                const logMin = Math.log10(minF);
+                const logMax = Math.log10(maxF);
+                const norm = (Math.log10(freq) - logMin) / (logMax - logMin);
+                const red = window.Utils ? window.Utils.clamp(1.0 - norm, 0, 1) : (1.0 - norm);
+                const green = window.Utils ? window.Utils.clamp(norm, 0, 1) : norm;
+                const blue = window.Utils ? window.Utils.clamp(a.amplitude || this.sourceAmplitude || 0, 0, 1) : (a.amplitude || this.sourceAmplitude || 0);
+                baseColor = { r: red, g: green, b: blue };
+            }
+        }
+        
+        // Apply energy intensity to color
         const energyRatio = this.currentEnergy / this.maxEnergy;
         const colorIntensity = window.Utils.clamp(energyRatio, 0.3, 1.0);
-        
-        this.color.r *= colorIntensity;
-        this.color.g *= colorIntensity;
-        this.color.b *= colorIntensity;
+        this.color.r = baseColor.r * colorIntensity;
+        this.color.g = baseColor.g * colorIntensity;
+        this.color.b = baseColor.b * colorIntensity;
     }
 
     /**
