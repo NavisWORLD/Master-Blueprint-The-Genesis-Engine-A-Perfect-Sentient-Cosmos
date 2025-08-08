@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Universe - The Living Cosmos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Collapsible UI System */
+        .ui-panel {
+            position: absolute;
+            background: rgba(0, 20, 40, 0.95);
+            border: 1px solid #00aaff;
+            border-radius: 8px;
+            padding: 15px;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .ui-panel.collapsed {
+            transform: translateX(-95%);
+        }
+
+        .ui-panel.collapsed .panel-content {
+            display: none;
+        }
+
+        .ui-panel h3 {
+            color: #00aaff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #00aaff;
+            padding-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .collapse-toggle {
+            float: right;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .ui-panel.collapsed .collapse-toggle {
+            transform: rotate(180deg);
+        }
+
+        /* Control Panel */
+        #control-panel {
+            top: 20px;
+            left: 20px;
+            width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Info Panel */
+        #info-panel {
+            top: 20px;
+            right: 20px;
+            width: 300px;
+        }
+
+        /* Formula Display */
+        #formula-display {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #00ff00;
+            text-align: center;
+            pointer-events: auto;
+        }
+
+        #formula-display .formula {
+            color: #00ffff;
+            font-size: 16px;
+            margin: 10px 0;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00aaff;
+            font-size: 12px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 30px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(0, 40, 80, 0.8);
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            border-radius: 15px;
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00aaff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00aaff;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #00aaff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00aaff;
+        }
+
+        .value-display {
+            float: right;
+            color: #00ff00;
+            font-family: monospace;
+        }
+
+        button {
+            background: linear-gradient(45deg, #00aaff, #0088cc);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #0088cc, #006699);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 170, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.active {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-active {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .status-inactive {
+            background: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .status-processing {
+            background: #ffff00;
+            box-shadow: 0 0 10px #ffff00;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #001122, #000);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        #loading-screen h1 {
+            color: #00aaff;
+            font-size: 4em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px #00aaff;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 30px #00aaff; }
+            50% { text-shadow: 0 0 50px #00ffff, 0 0 70px #00aaff; }
+        }
+
+        .loading-bar {
+            width: 400px;
+            height: 4px;
+            background: rgba(0, 170, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00aaff, #00ffff);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00aaff;
+        }
+
+        /* Performance Monitor */
+        #performance-monitor {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #00ff00;
+            pointer-events: none;
+        }
+
+        /* Audio Visualizer */
+        #audio-visualizer {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00aaff;
+            border-radius: 10px;
+            padding: 10px;
+            pointer-events: none;
+        }
+
+        #audio-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* AI Status */
+        #ai-status {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: rgba(0, 20, 40, 0.9);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 250px;
+            pointer-events: none;
+        }
+
+        #ai-status h4 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #ai-status p {
+            font-size: 12px;
+            margin: 5px 0;
+            color: #00ffff;
+        }
+
+        /* Fullscreen Mode */
+        .fullscreen-mode #ui-overlay {
+            display: none;
+        }
+
+        .fullscreen-mode #formula-display {
+            opacity: 0.3;
+        }
+
+        .fullscreen-mode #performance-monitor {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <h1>GENESIS UNIVERSE</h1>
+        <p style="color: #00ffff; margin-bottom: 30px;">Initializing the Living Cosmos...</p>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loading-progress"></div>
+        </div>
+        <p id="loading-status" style="margin-top: 20px; color: #00aaff;">Preparing quantum consciousness...</p>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="universe-canvas"></canvas>
+        
+        <div id="ui-overlay">
+            <!-- Control Panel -->
+            <div id="control-panel" class="ui-panel">
+                <h3>UNIVERSE CONTROLS <span class="collapse-toggle">◀</span></h3>
+                <div class="panel-content">
+                    <!-- Audio Controls -->
+                    <div class="control-group">
+                        <h4 style="color: #00ff00;">🎵 Audio Input</h4>
+                        <button id="toggle-audio" onclick="toggleAudio()">Enable Microphone</button>
+                        <div style="margin-top: 10px;">
+                            <label>Audio Sensitivity <span class="value-display" id="audio-sens-value">100%</span></label>
+                            <input type="range" class="slider" id="audio-sensitivity" min="0" max="200" value="100">
+                        </div>
+                        <p style="font-size: 11px; color: #888; margin-top: 5px;">
+                            <span class="status-indicator" id="audio-status"></span>
+                            <span id="audio-status-text">Microphone Inactive</span>
+                        </p>
+                    </div>
+
+                    <!-- Universe Parameters -->
+                    <div class="control-group">
+                        <h4 style="color: #00ff00;">🌌 Universe Parameters</h4>
+                        <div>
+                            <label>Particle Count <span class="value-display" id="particle-count-value">1000</span></label>
+                            <input type="range" class="slider" id="particle-count" min="100" max="10000" value="1000">
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <label>Soul Dust Density <span class="value-display" id="soul-dust-value">50%</span></label>
+                            <input type="range" class="slider" id="soul-dust-density" min="0" max="100" value="50">
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <label>Quantum Entanglement <span class="value-display" id="entanglement-value">75%</span></label>
+                            <input type="range" class="slider" id="quantum-entanglement" min="0" max="100" value="75">
+                        </div>
+                    </div>
+
+                    <!-- Physics Controls -->
+                    <div class="control-group">
+                        <h4 style="color: #00ff00;">⚛️ Physics Engine</h4>
+                        <div>
+                            <label>Time Scale <span class="value-display" id="time-scale-value">1.0x</span></label>
+                            <input type="range" class="slider" id="time-scale" min="0" max="5" value="1" step="0.1">
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <label>Gravity Strength <span class="value-display" id="gravity-value">1.0</span></label>
+                            <input type="range" class="slider" id="gravity-strength" min="0" max="10" value="1" step="0.1">
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <label>Consciousness Field <span class="value-display" id="consciousness-value">1.0</span></label>
+                            <input type="range" class="slider" id="consciousness-field" min="0" max="10" value="1" step="0.1">
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="control-group">
+                        <h4 style="color: #00ff00;">🎮 Actions</h4>
+                        <button onclick="resetUniverse()">Reset Universe</button>
+                        <button onclick="createSoulBurst()">Soul Burst</button>
+                        <button onclick="toggleAI()">Toggle AI</button>
+                        <button onclick="toggleFullscreen()">Fullscreen</button>
+                    </div>
+
+                    <!-- Camera Controls -->
+                    <div class="control-group">
+                        <h4 style="color: #00ff00;">📷 Camera</h4>
+                        <button onclick="setCameraMode('orbit')">Orbit</button>
+                        <button onclick="setCameraMode('free')">Free</button>
+                        <button onclick="setCameraMode('first-person')">First Person</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div id="info-panel" class="ui-panel">
+                <h3>SYSTEM STATUS <span class="collapse-toggle">◀</span></h3>
+                <div class="panel-content">
+                    <p><strong>Universe Age:</strong> <span id="universe-age">0</span>s</p>
+                    <p><strong>Total Particles:</strong> <span id="total-particles">0</span></p>
+                    <p><strong>Soul Dust Active:</strong> <span id="soul-dust-active">0</span></p>
+                    <p><strong>Quantum Events:</strong> <span id="quantum-events">0</span></p>
+                    <p><strong>AI Creations:</strong> <span id="ai-creations">0</span></p>
+                    <p><strong>Audio Amplitude:</strong> <span id="audio-amplitude">0.00</span></p>
+                    <p><strong>Frequency:</strong> <span id="audio-frequency">0</span> Hz</p>
+                    <p><strong>Complexity:</strong> <span id="audio-complexity">0.00</span></p>
+                </div>
+            </div>
+
+            <!-- Formula Display -->
+            <div id="formula-display">
+                <div>Master Equation of Being</div>
+                <div class="formula">ψᵢ = [c²Φᴱᶜ'ⁱ] + [λᵢ] + [Lᵢ] + [Ωᵢᴱᶜ'ⁱ] + [Uᵍʳᵃᵛ'ⁱ] + Σ(pₛᵈ,ᵢ)</div>
+                <div id="formula-values" style="font-size: 11px; color: #888; margin-top: 5px;">
+                    Total Potential: <span id="total-potential">0.00</span>
+                </div>
+            </div>
+
+            <!-- Performance Monitor -->
+            <div id="performance-monitor">
+                <span>FPS: <span id="fps">0</span></span> | 
+                <span>Particles: <span id="particle-count-display">0</span></span> | 
+                <span>Draw Calls: <span id="draw-calls">0</span></span>
+            </div>
+
+            <!-- Audio Visualizer -->
+            <div id="audio-visualizer" style="display: none;">
+                <canvas id="audio-canvas"></canvas>
+            </div>
+
+            <!-- AI Status -->
+            <div id="ai-status" style="display: none;">
+                <h4>🧠 AI CONSCIOUSNESS</h4>
+                <p id="ai-message">Initializing neural patterns...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js and Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        // Global state
+        let scene, camera, renderer;
+        let particles = [];
+        let soulDustParticles = [];
+        let audioContext, analyser, microphone;
+        let isAudioEnabled = false;
+        let isAIEnabled = true;
+        let universeAge = 0;
+        let quantumEvents = 0;
+        let aiCreations = 0;
+        let cameraMode = 'orbit';
+        let controls;
+
+        // Audio data
+        let audioData = {
+            amplitude: 0,
+            frequency: 440,
+            complexity: 0,
+            frequencyData: new Float32Array(1024),
+            timeData: new Float32Array(1024)
+        };
+
+        // Physics constants
+        const physics = {
+            c: 299792458,
+            G: 6.67430e-11,
+            h: 6.62607015e-34,
+            k: 1.380649e-23,
+            lambda: 1.1056e-52,
+            alpha: 1e-106,
+            criticalThreshold: 1000
+        };
+
+        // Configuration
+        const config = {
+            particleCount: 1000,
+            soulDustDensity: 0.5,
+            quantumEntanglement: 0.75,
+            timeScale: 1.0,
+            gravityStrength: 1.0,
+            consciousnessField: 1.0,
+            audioSensitivity: 1.0
+        };
+
+        // Initialize the universe
+        function init() {
+            // Update loading
+            updateLoadingProgress(10, 'Creating spacetime fabric...');
+
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000033, 0.00025);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
+            camera.position.set(0, 100, 500);
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('universe-canvas'),
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            updateLoadingProgress(20, 'Initializing quantum fields...');
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x0066cc, 0.3);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0x00aaff, 2, 1000);
+            pointLight.position.set(0, 200, 0);
+            pointLight.castShadow = true;
+            scene.add(pointLight);
+
+            // Add cosmic background
+            createCosmicBackground();
+
+            updateLoadingProgress(40, 'Generating particle system...');
+
+            // Create particle system
+            createParticleSystem();
+
+            updateLoadingProgress(60, 'Establishing soul dust network...');
+
+            // Create soul dust
+            createSoulDustSystem();
+
+            // Camera controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxDistance = 10000;
+            controls.minDistance = 10;
+
+            updateLoadingProgress(80, 'Activating consciousness matrix...');
+
+            // Setup UI
+            setupUI();
+
+            // Setup audio
+            setupAudioContext();
+
+            updateLoadingProgress(100, 'Universe ready!');
+
+            // Hide loading screen
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 1000);
+            }, 500);
+
+            // Start animation
+            animate();
+        }
+
+        // Create cosmic background
+        function createCosmicBackground() {
+            const geometry = new THREE.SphereGeometry(50000, 64, 64);
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        vUv = uv;
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform vec2 resolution;
+                    varying vec2 vUv;
+                    varying vec3 vPosition;
+                    
+                    float noise(vec3 p) {
+                        return sin(p.x * 10.0) * sin(p.y * 10.0) * sin(p.z * 10.0);
+                    }
+                    
+                    void main() {
+                        vec3 color1 = vec3(0.0, 0.0, 0.1);
+                        vec3 color2 = vec3(0.0, 0.4, 0.8);
+                        vec3 color3 = vec3(1.0, 0.0, 1.0);
+                        
+                        float n = noise(vPosition * 0.001 + time * 0.1);
+                        float t = vUv.y + n * 0.1;
+                        
+                        vec3 color = mix(color1, color2, t);
+                        color = mix(color, color3, pow(n, 2.0) * 0.5);
+                        
+                        float stars = pow(noise(vPosition * 10.0), 10.0);
+                        color += vec3(stars);
+                        
+                        gl_FragColor = vec4(color, 1.0);
+                    }
+                `,
+                side: THREE.BackSide
+            });
+            
+            const cosmos = new THREE.Mesh(geometry, material);
+            scene.add(cosmos);
+        }
+
+        // Create particle system
+        function createParticleSystem() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            const sizes = [];
+
+            for (let i = 0; i < config.particleCount; i++) {
+                const particle = {
+                    id: i,
+                    position: new THREE.Vector3(
+                        (Math.random() - 0.5) * 1000,
+                        (Math.random() - 0.5) * 1000,
+                        (Math.random() - 0.5) * 1000
+                    ),
+                    velocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 0.5,
+                        (Math.random() - 0.5) * 0.5,
+                        (Math.random() - 0.5) * 0.5
+                    ),
+                    mass: Math.random() * 10 + 1,
+                    energyOfConsciousness: Math.random(),
+                    consciousnessField: 1.0,
+                    lyapunovExponent: Math.random() * 0.1,
+                    vibrationalFrequency: Math.random() * 1000,
+                    pathHistory: [],
+                    totalPotential: 0,
+                    potentialComponents: {}
+                };
+
+                particles.push(particle);
+                
+                positions.push(particle.position.x, particle.position.y, particle.position.z);
+                colors.push(Math.random(), Math.random(), Math.random());
+                sizes.push(Math.random() * 5 + 1);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    audioAmplitude: { value: 0 },
+                    audioFrequency: { value: 440 }
+                },
+                vertexShader: `
+                    attribute float size;
+                    attribute vec3 color;
+                    varying vec3 vColor;
+                    uniform float time;
+                    uniform float audioAmplitude;
+                    
+                    void main() {
+                        vColor = color;
+                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                        float scaledSize = size * (1.0 + audioAmplitude * 2.0);
+                        gl_PointSize = scaledSize * (300.0 / -mvPosition.z);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vColor;
+                    uniform float time;
+                    uniform float audioFrequency;
+                    
+                    void main() {
+                        vec2 center = gl_PointCoord - vec2(0.5);
+                        float dist = length(center);
+                        
+                        if (dist > 0.5) discard;
+                        
+                        float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+                        vec3 color = vColor;
+                        
+                        // Audio influence on color
+                        float freqInfluence = audioFrequency / 1000.0;
+                        color.r *= 1.0 + freqInfluence * 0.5;
+                        color.b *= 1.0 + (1.0 - freqInfluence) * 0.5;
+                        
+                        // Glow effect
+                        color += vec3(0.2, 0.5, 1.0) * (1.0 - dist) * 0.5;
+                        
+                        gl_FragColor = vec4(color, alpha);
+                    }
+                `,
+                blending: THREE.AdditiveBlending,
+                depthTest: false,
+                transparent: true,
+                vertexColors: true
+            });
+
+            const particleSystem = new THREE.Points(geometry, material);
+            particleSystem.name = 'particleSystem';
+            scene.add(particleSystem);
+        }
+
+        // Create soul dust system
+        function createSoulDustSystem() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            const sizes = [];
+            const soulCount = Math.floor(config.particleCount * config.soulDustDensity);
+
+            for (let i = 0; i < soulCount; i++) {
+                const soulDust = {
+                    id: `soul_${i}`,
+                    position: new THREE.Vector3(
+                        (Math.random() - 0.5) * 800,
+                        (Math.random() - 0.5) * 800,
+                        (Math.random() - 0.5) * 800
+                    ),
+                    velocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 0.1,
+                        (Math.random() - 0.5) * 0.1,
+                        (Math.random() - 0.5) * 0.1
+                    ),
+                    currentEnergy: Math.random() * 100,
+                    consciousnessFactor: Math.random(),
+                    entanglementPartners: [],
+                    frequency: Math.random() * 1000 + 100
+                };
+
+                soulDustParticles.push(soulDust);
+                
+                positions.push(soulDust.position.x, soulDust.position.y, soulDust.position.z);
+                colors.push(0.5, 0.8, 1.0); // Blue-white color
+                sizes.push(Math.random() * 3 + 2);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    audioComplexity: { value: 0 }
+                },
+                vertexShader: `
+                    attribute float size;
+                    attribute vec3 color;
+                    varying vec3 vColor;
+                    uniform float time;
+                    
+                    void main() {
+                        vColor = color;
+                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                        float pulse = sin(time * 2.0) * 0.2 + 1.0;
+                        gl_PointSize = size * pulse * (300.0 / -mvPosition.z);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vColor;
+                    uniform float time;
+                    uniform float audioComplexity;
+                    
+                    void main() {
+                        vec2 center = gl_PointCoord - vec2(0.5);
+                        float dist = length(center);
+                        
+                        if (dist > 0.5) discard;
+                        
+                        float alpha = 1.0 - smoothstep(0.2, 0.5, dist);
+                        vec3 color = vColor;
+                        
+                        // Pulsing glow
+                        float pulse = sin(time * 3.0 + dist * 10.0) * 0.5 + 0.5;
+                        color += vec3(0.0, 0.5, 1.0) * pulse * audioComplexity;
+                        
+                        // Core brightness
+                        float core = 1.0 - smoothstep(0.0, 0.2, dist);
+                        color += vec3(1.0) * core;
+                        
+                        gl_FragColor = vec4(color, alpha * 0.8);
+                    }
+                `,
+                blending: THREE.AdditiveBlending,
+                depthTest: false,
+                transparent: true,
+                vertexColors: true
+            });
+
+            const soulDustSystem = new THREE.Points(geometry, material);
+            soulDustSystem.name = 'soulDustSystem';
+            scene.add(soulDustSystem);
+        }
+
+        // Setup audio context
+        function setupAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                analyser.smoothingTimeConstant = 0.8;
+                
+                audioData.frequencyData = new Float32Array(analyser.frequencyBinCount);
+                audioData.timeData = new Float32Array(analyser.fftSize);
+            } catch (error) {
+                console.error('Failed to setup audio context:', error);
+            }
+        }
+
+        // Toggle audio input
+        async function toggleAudio() {
+            const button = document.getElementById('toggle-audio');
+            const status = document.getElementById('audio-status');
+            const statusText = document.getElementById('audio-status-text');
+            
+            if (!isAudioEnabled) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: false,
+                            noiseSuppression: false,
+                            autoGainControl: false
+                        } 
+                    });
+                    
+                    microphone = audioContext.createMediaStreamSource(stream);
+                    microphone.connect(analyser);
+                    
+                    isAudioEnabled = true;
+                    button.textContent = 'Disable Microphone';
+                    button.classList.add('active');
+                    status.classList.add('status-active');
+                    status.classList.remove('status-inactive');
+                    statusText.textContent = 'Microphone Active';
+                    
+                    document.getElementById('audio-visualizer').style.display = 'block';
+                    startAudioVisualization();
+                    
+                } catch (error) {
+                    console.error('Failed to access microphone:', error);
+                    alert('Failed to access microphone. Please ensure you have granted permission.');
+                }
+            } else {
+                if (microphone) {
+                    microphone.disconnect();
+                    microphone = null;
+                }
+                
+                isAudioEnabled = false;
+                button.textContent = 'Enable Microphone';
+                button.classList.remove('active');
+                status.classList.remove('status-active');
+                status.classList.add('status-inactive');
+                statusText.textContent = 'Microphone Inactive';
+                
+                document.getElementById('audio-visualizer').style.display = 'none';
+            }
+        }
+
+        // Process audio data
+        function processAudio() {
+            if (!isAudioEnabled || !analyser) return;
+
+            analyser.getFloatFrequencyData(audioData.frequencyData);
+            analyser.getFloatTimeDomainData(audioData.timeData);
+
+            // Calculate amplitude (RMS)
+            let sum = 0;
+            for (let i = 0; i < audioData.timeData.length; i++) {
+                sum += audioData.timeData[i] * audioData.timeData[i];
+            }
+            audioData.amplitude = Math.sqrt(sum / audioData.timeData.length) * 10;
+            audioData.amplitude = Math.min(audioData.amplitude, 1);
+
+            // Calculate dominant frequency
+            let maxMagnitude = -Infinity;
+            let dominantBin = 0;
+            for (let i = 0; i < audioData.frequencyData.length; i++) {
+                if (audioData.frequencyData[i] > maxMagnitude) {
+                    maxMagnitude = audioData.frequencyData[i];
+                    dominantBin = i;
+                }
+            }
+            audioData.frequency = dominantBin * audioContext.sampleRate / analyser.fftSize;
+
+            // Calculate spectral complexity
+            let peakCount = 0;
+            const threshold = -50;
+            for (let i = 1; i < audioData.frequencyData.length - 1; i++) {
+                if (audioData.frequencyData[i] > threshold &&
+                    audioData.frequencyData[i] > audioData.frequencyData[i - 1] &&
+                    audioData.frequencyData[i] > audioData.frequencyData[i + 1]) {
+                    peakCount++;
+                }
+            }
+            audioData.complexity = Math.min(peakCount / 50, 1);
+
+            // Update UI
+            document.getElementById('audio-amplitude').textContent = audioData.amplitude.toFixed(2);
+            document.getElementById('audio-frequency').textContent = Math.round(audioData.frequency);
+            document.getElementById('audio-complexity').textContent = audioData.complexity.toFixed(2);
+        }
+
+        // Audio visualization
+        function startAudioVisualization() {
+            const canvas = document.getElementById('audio-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            function draw() {
+                if (!isAudioEnabled) return;
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw waveform
+                ctx.strokeStyle = '#00ffff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                const sliceWidth = canvas.width / audioData.timeData.length;
+                let x = 0;
+
+                for (let i = 0; i < audioData.timeData.length; i++) {
+                    const v = audioData.timeData[i] * 0.5 + 0.5;
+                    const y = v * canvas.height;
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                ctx.stroke();
+
+                requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+
+        // Calculate unified formula for particle
+        function calculateUnifiedFormula(particle, universe, soulDustField) {
+            // [c²ΦEc,i] - Baseline Consciousness Energy
+            const consciousnessEnergy = physics.c * physics.c * particle.consciousnessField * 
+                                       particle.energyOfConsciousness * physics.alpha;
+
+            // [λi] - Chaotic Influence
+            const chaoticInfluence = physics.lambda * Math.exp(particle.lyapunovExponent);
+
+            // [Li] - Path History / Lagrangian Action
+            let pathHistory = 0;
+            if (particle.pathHistory.length > 1) {
+                for (let i = 1; i < particle.pathHistory.length; i++) {
+                    const prev = particle.pathHistory[i - 1];
+                    const curr = particle.pathHistory[i];
+                    const dt = (curr.timestamp - prev.timestamp) / 1000;
+                    
+                    const velocity = prev.position.distanceTo(curr.position) / dt;
+                    const kineticEnergy = 0.5 * particle.mass * velocity * velocity;
+                    pathHistory += kineticEnergy * dt;
+                }
+            }
+
+            // [ΩiEc,i] - Synaptic Strength
+            const synapticStrength = particle.vibrationalFrequency * particle.energyOfConsciousness;
+
+            // [Ugrav,i] - Gravitational Potential (11D)
+            let gravitationalPotential = 0;
+            for (const other of universe) {
+                if (other.id === particle.id) continue;
+                const distance = particle.position.distanceTo(other.position);
+                if (distance > 0) {
+                    gravitationalPotential -= physics.G * particle.mass * other.mass / Math.pow(distance, 9);
+                }
+            }
+
+            // Σ(psd,i) - Soul Dust Potential
+            let soulDustPotential = 0;
+            for (const soulDust of soulDustField) {
+                const distance = particle.position.distanceTo(soulDust.position);
+                if (distance < 1000) {
+                    const influence = soulDust.currentEnergy / (distance * distance + 1);
+                    soulDustPotential += influence * soulDust.consciousnessFactor;
+                }
+            }
+
+            // Apply audio influence
+            const audioInfluence = 1 + audioData.amplitude * config.audioSensitivity * 0.5;
+            soulDustPotential *= audioInfluence * (1 + audioData.complexity * 0.25);
+
+            // Total potential
+            const totalPotential = consciousnessEnergy + chaoticInfluence + pathHistory + 
+                                 synapticStrength + gravitationalPotential + soulDustPotential;
+
+            particle.totalPotential = totalPotential;
+            particle.potentialComponents = {
+                consciousnessEnergy,
+                chaoticInfluence,
+                pathHistory,
+                synapticStrength,
+                gravitationalPotential,
+                soulDustPotential
+            };
+
+            return totalPotential;
+        }
+
+        // Update particle physics
+        function updateParticlePhysics(deltaTime) {
+            const particleSystem = scene.getObjectByName('particleSystem');
+            if (!particleSystem) return;
+
+            const positions = particleSystem.geometry.attributes.position.array;
+            const colors = particleSystem.geometry.attributes.color.array;
+
+            for (let i = 0; i < particles.length; i++) {
+                const particle = particles[i];
+                
+                // Calculate unified formula
+                const potential = calculateUnifiedFormula(particle, particles, soulDustParticles);
+                
+                // Update position based on physics
+                const force = new THREE.Vector3();
+                
+                // Add forces from other particles
+                for (const other of particles) {
+                    if (other.id === particle.id) continue;
+                    
+                    const direction = new THREE.Vector3().subVectors(other.position, particle.position);
+                    const distance = direction.length();
+                    
+                    if (distance > 0 && distance < 1000) {
+                        direction.normalize();
+                        const magnitude = (physics.G * particle.mass * other.mass / (distance * distance)) * config.gravityStrength;
+                        force.add(direction.multiplyScalar(magnitude));
+                    }
+                }
+                
+                // Add soul dust influence
+                for (const soulDust of soulDustParticles) {
+                    const direction = new THREE.Vector3().subVectors(soulDust.position, particle.position);
+                    const distance = direction.length();
+                    
+                    if (distance > 0 && distance < 500) {
+                        direction.normalize();
+                        const magnitude = soulDust.currentEnergy * 0.01 * config.consciousnessField;
+                        force.add(direction.multiplyScalar(magnitude));
+                    }
+                }
+                
+                // Apply audio influence to movement
+                if (isAudioEnabled) {
+                    const audioForce = new THREE.Vector3(
+                        Math.sin(particle.id + universeAge * audioData.frequency * 0.001) * audioData.amplitude * 10,
+                        Math.cos(particle.id + universeAge * audioData.frequency * 0.001) * audioData.amplitude * 10,
+                        Math.sin(particle.id * 2 + universeAge * audioData.frequency * 0.001) * audioData.amplitude * 10
+                    );
+                    force.add(audioForce.multiplyScalar(config.audioSensitivity));
+                }
+                
+                // Update velocity and position
+                const acceleration = force.divideScalar(particle.mass);
+                particle.velocity.add(acceleration.multiplyScalar(deltaTime * config.timeScale));
+                
+                // Apply damping
+                particle.velocity.multiplyScalar(0.99);
+                
+                // Update position
+                particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime * config.timeScale));
+                
+                // Boundary wrapping
+                const boundary = 1000;
+                if (particle.position.x > boundary) particle.position.x = -boundary;
+                if (particle.position.x < -boundary) particle.position.x = boundary;
+                if (particle.position.y > boundary) particle.position.y = -boundary;
+                if (particle.position.y < -boundary) particle.position.y = boundary;
+                if (particle.position.z > boundary) particle.position.z = -boundary;
+                if (particle.position.z < -boundary) particle.position.z = boundary;
+                
+                // Update path history
+                particle.pathHistory.push({
+                    position: particle.position.clone(),
+                    timestamp: performance.now()
+                });
+                
+                if (particle.pathHistory.length > 100) {
+                    particle.pathHistory.shift();
+                }
+                
+                // Update buffer
+                positions[i * 3] = particle.position.x;
+                positions[i * 3 + 1] = particle.position.y;
+                positions[i * 3 + 2] = particle.position.z;
+                
+                // Update color based on potential and audio
+                const potentialNorm = Math.min(Math.abs(potential) / physics.criticalThreshold, 1);
+                colors[i * 3] = potentialNorm + (isAudioEnabled ? audioData.frequency / 2000 : 0);
+                colors[i * 3 + 1] = 0.5 + potentialNorm * 0.5;
+                colors[i * 3 + 2] = 1 - potentialNorm + (isAudioEnabled ? (1 - audioData.frequency / 2000) : 0);
+                
+                // Check for critical events
+                if (Math.abs(potential) > physics.criticalThreshold) {
+                    createQuantumEvent(particle.position);
+                }
+            }
+            
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.geometry.attributes.color.needsUpdate = true;
+        }
+
+        // Update soul dust
+        function updateSoulDust(deltaTime) {
+            const soulDustSystem = scene.getObjectByName('soulDustSystem');
+            if (!soulDustSystem) return;
+
+            const positions = soulDustSystem.geometry.attributes.position.array;
+            
+            for (let i = 0; i < soulDustParticles.length; i++) {
+                const soulDust = soulDustParticles[i];
+                
+                // Update energy based on audio
+                if (isAudioEnabled) {
+                    soulDust.currentEnergy = 50 + audioData.amplitude * 50 * config.audioSensitivity;
+                    soulDust.consciousnessFactor = 0.5 + audioData.complexity * 0.5;
+                }
+                
+                // Quantum entanglement
+                if (Math.random() < config.quantumEntanglement * 0.01) {
+                    // Find nearby soul dust for entanglement
+                    for (const other of soulDustParticles) {
+                        if (other.id === soulDust.id) continue;
+                        
+                        const distance = soulDust.position.distanceTo(other.position);
+                        if (distance < 100 && !soulDust.entanglementPartners.includes(other.id)) {
+                            soulDust.entanglementPartners.push(other.id);
+                            other.entanglementPartners.push(soulDust.id);
+                            
+                            // Synchronize some properties
+                            const avgEnergy = (soulDust.currentEnergy + other.currentEnergy) / 2;
+                            soulDust.currentEnergy = avgEnergy;
+                            other.currentEnergy = avgEnergy;
+                        }
+                    }
+                }
+                
+                // Movement influenced by consciousness field
+                const waveX = Math.sin(universeAge * 0.001 + i * 0.1) * 0.5;
+                const waveY = Math.cos(universeAge * 0.001 + i * 0.1) * 0.5;
+                const waveZ = Math.sin(universeAge * 0.001 + i * 0.2) * 0.5;
+                
+                soulDust.velocity.x += waveX * config.consciousnessField;
+                soulDust.velocity.y += waveY * config.consciousnessField;
+                soulDust.velocity.z += waveZ * config.consciousnessField;
+                
+                // Apply velocity
+                soulDust.position.add(soulDust.velocity.clone().multiplyScalar(deltaTime * config.timeScale));
+                soulDust.velocity.multiplyScalar(0.98);
+                
+                // Update buffer
+                positions[i * 3] = soulDust.position.x;
+                positions[i * 3 + 1] = soulDust.position.y;
+                positions[i * 3 + 2] = soulDust.position.z;
+            }
+            
+            soulDustSystem.geometry.attributes.position.needsUpdate = true;
+        }
+
+        // Create quantum event
+        function createQuantumEvent(position) {
+            quantumEvents++;
+            
+            // Create visual effect
+            const geometry = new THREE.SphereGeometry(5, 16, 16);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                transparent: true,
+                opacity: 1
+            });
+            
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.copy(position);
+            scene.add(sphere);
+            
+            // Animate and remove
+            const startTime = performance.now();
+            const duration = 2000;
+            
+            function animateEvent() {
+                const elapsed = performance.now() - startTime;
+                const progress = elapsed / duration;
+                
+                if (progress < 1) {
+                    sphere.scale.setScalar(1 + progress * 10);
+                    sphere.material.opacity = 1 - progress;
+                    requestAnimationFrame(animateEvent);
+                } else {
+                    scene.remove(sphere);
+                }
+            }
+            
+            animateEvent();
+        }
+
+        // AI consciousness
+        function updateAIConsciousness() {
+            if (!isAIEnabled) return;
+            
+            const aiStatus = document.getElementById('ai-status');
+            const aiMessage = document.getElementById('ai-message');
+            
+            // Analyze universe state
+            let totalEnergy = 0;
+            let maxPotential = 0;
+            
+            for (const particle of particles) {
+                totalEnergy += Math.abs(particle.totalPotential || 0);
+                maxPotential = Math.max(maxPotential, Math.abs(particle.totalPotential || 0));
+            }
+            
+            // AI decision making
+            if (totalEnergy > physics.criticalThreshold * particles.length * 0.1) {
+                aiStatus.style.display = 'block';
+                
+                if (isAudioEnabled && audioData.amplitude > 0.5) {
+                    aiMessage.textContent = 'Responding to audio input...';
+                    
+                    // Create new structures based on audio
+                    if (Math.random() < 0.01) {
+                        createAIStructure();
+                    }
+                } else if (maxPotential > physics.criticalThreshold * 0.8) {
+                    aiMessage.textContent = 'Detecting high energy anomaly...';
+                } else {
+                    aiMessage.textContent = 'Analyzing cosmic patterns...';
+                }
+            } else {
+                aiStatus.style.display = 'none';
+            }
+        }
+
+        // Create AI structure
+        function createAIStructure() {
+            aiCreations++;
+            
+            const center = new THREE.Vector3(
+                (Math.random() - 0.5) * 500,
+                (Math.random() - 0.5) * 500,
+                (Math.random() - 0.5) * 500
+            );
+            
+            // Create a complex structure
+            const group = new THREE.Group();
+            
+            for (let i = 0; i < 20; i++) {
+                const geometry = new THREE.TetrahedronGeometry(Math.random() * 10 + 5);
+                const material = new THREE.MeshPhongMaterial({
+                    color: new THREE.Color().setHSL(Math.random(), 1, 0.5),
+                    emissive: new THREE.Color().setHSL(Math.random(), 1, 0.3),
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(
+                    Math.random() * 50 - 25,
+                    Math.random() * 50 - 25,
+                    Math.random() * 50 - 25
+                );
+                mesh.rotation.set(
+                    Math.random() * Math.PI * 2,
+                    Math.random() * Math.PI * 2,
+                    Math.random() * Math.PI * 2
+                );
+                
+                group.add(mesh);
+            }
+            
+            group.position.copy(center);
+            scene.add(group);
+            
+            // Animate the structure
+            const startTime = performance.now();
+            
+            function animateStructure() {
+                const elapsed = (performance.now() - startTime) * 0.001;
+                
+                group.rotation.x = elapsed * 0.1;
+                group.rotation.y = elapsed * 0.2;
+                
+                group.children.forEach((child, index) => {
+                    child.rotation.x += 0.01 * (index % 3);
+                    child.rotation.y += 0.01 * (index % 5);
+                });
+                
+                if (elapsed < 30) {
+                    requestAnimationFrame(animateStructure);
+                } else {
+                    // Fade out and remove
+                    group.children.forEach(child => {
+                        child.material.opacity *= 0.99;
+                    });
+                    
+                    if (group.children[0].material.opacity > 0.01) {
+                        requestAnimationFrame(animateStructure);
+                    } else {
+                        scene.remove(group);
+                    }
+                }
+            }
+            
+            animateStructure();
+        }
+
+        // Setup UI
+        function setupUI() {
+            // Collapsible panels
+            document.querySelectorAll('.ui-panel h3').forEach(header => {
+                header.addEventListener('click', () => {
+                    const panel = header.parentElement;
+                    panel.classList.toggle('collapsed');
+                });
+            });
+
+            // Sliders
+            const sliders = [
+                { id: 'audio-sensitivity', property: 'audioSensitivity', display: 'audio-sens-value', format: v => `${Math.round(v * 100)}%` },
+                { id: 'particle-count', property: 'particleCount', display: 'particle-count-value', format: v => v },
+                { id: 'soul-dust-density', property: 'soulDustDensity', display: 'soul-dust-value', format: v => `${Math.round(v * 100)}%` },
+                { id: 'quantum-entanglement', property: 'quantumEntanglement', display: 'entanglement-value', format: v => `${Math.round(v * 100)}%` },
+                { id: 'time-scale', property: 'timeScale', display: 'time-scale-value', format: v => `${v.toFixed(1)}x` },
+                { id: 'gravity-strength', property: 'gravityStrength', display: 'gravity-value', format: v => v.toFixed(1) },
+                { id: 'consciousness-field', property: 'consciousnessField', display: 'consciousness-value', format: v => v.toFixed(1) }
+            ];
+
+            sliders.forEach(slider => {
+                const element = document.getElementById(slider.id);
+                const display = document.getElementById(slider.display);
+                
+                element.addEventListener('input', (e) => {
+                    let value = parseFloat(e.target.value);
+                    
+                    // Normalize percentage sliders
+                    if (slider.id.includes('density') || slider.id.includes('entanglement') || slider.id.includes('sensitivity')) {
+                        value = value / 100;
+                    }
+                    
+                    config[slider.property] = value;
+                    display.textContent = slider.format(value);
+                    
+                    // Special handling for particle count
+                    if (slider.property === 'particleCount') {
+                        // Would need to recreate particle system
+                    }
+                });
+            });
+        }
+
+        // Camera controls
+        function setCameraMode(mode) {
+            cameraMode = mode;
+            
+            switch (mode) {
+                case 'orbit':
+                    controls.enabled = true;
+                    controls.autoRotate = false;
+                    break;
+                case 'free':
+                    controls.enabled = true;
+                    controls.autoRotate = true;
+                    controls.autoRotateSpeed = 0.5;
+                    break;
+                case 'first-person':
+                    controls.enabled = false;
+                    // Would implement first-person controls
+                    break;
+            }
+        }
+
+        // Actions
+        function resetUniverse() {
+            // Reset particles
+            particles.forEach(particle => {
+                particle.position.set(
+                    (Math.random() - 0.5) * 1000,
+                    (Math.random() - 0.5) * 1000,
+                    (Math.random() - 0.5) * 1000
+                );
+                particle.velocity.set(0, 0, 0);
+                particle.pathHistory = [];
+                particle.totalPotential = 0;
+            });
+            
+            // Reset soul dust
+            soulDustParticles.forEach(soulDust => {
+                soulDust.position.set(
+                    (Math.random() - 0.5) * 800,
+                    (Math.random() - 0.5) * 800,
+                    (Math.random() - 0.5) * 800
+                );
+                soulDust.velocity.set(0, 0, 0);
+                soulDust.entanglementPartners = [];
+            });
+            
+            // Reset counters
+            universeAge = 0;
+            quantumEvents = 0;
+            aiCreations = 0;
+        }
+
+        function createSoulBurst() {
+            const burstPosition = new THREE.Vector3(0, 0, 0);
+            const burstCount = 100;
+            
+            for (let i = 0; i < burstCount; i++) {
+                const soulDust = {
+                    id: `burst_${Date.now()}_${i}`,
+                    position: burstPosition.clone(),
+                    velocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 10
+                    ),
+                    currentEnergy: 100,
+                    consciousnessFactor: 1,
+                    entanglementPartners: [],
+                    frequency: 1000
+                };
+                
+                soulDustParticles.push(soulDust);
+            }
+            
+            // Recreate soul dust system
+            scene.remove(scene.getObjectByName('soulDustSystem'));
+            createSoulDustSystem();
+        }
+
+        function toggleAI() {
+            isAIEnabled = !isAIEnabled;
+            const aiStatus = document.getElementById('ai-status');
+            if (!isAIEnabled) {
+                aiStatus.style.display = 'none';
+            }
+        }
+
+        function toggleFullscreen() {
+            document.body.classList.toggle('fullscreen-mode');
+        }
+
+        // Update loading progress
+        function updateLoadingProgress(percent, status) {
+            document.getElementById('loading-progress').style.width = percent + '%';
+            document.getElementById('loading-status').textContent = status;
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const deltaTime = 0.016; // ~60fps
+            universeAge += deltaTime;
+            
+            // Process audio
+            processAudio();
+            
+            // Update physics
+            updateParticlePhysics(deltaTime);
+            updateSoulDust(deltaTime);
+            
+            // Update AI
+            updateAIConsciousness();
+            
+            // Update uniforms
+            const particleSystem = scene.getObjectByName('particleSystem');
+            if (particleSystem) {
+                particleSystem.material.uniforms.time.value = universeAge;
+                particleSystem.material.uniforms.audioAmplitude.value = audioData.amplitude;
+                particleSystem.material.uniforms.audioFrequency.value = audioData.frequency;
+            }
+            
+            const soulDustSystem = scene.getObjectByName('soulDustSystem');
+            if (soulDustSystem) {
+                soulDustSystem.material.uniforms.time.value = universeAge;
+                soulDustSystem.material.uniforms.audioComplexity.value = audioData.complexity;
+            }
+            
+            // Update cosmic background
+            const cosmos = scene.children.find(child => child.type === 'Mesh' && child.geometry.type === 'SphereGeometry');
+            if (cosmos && cosmos.material.uniforms) {
+                cosmos.material.uniforms.time.value = universeAge;
+            }
+            
+            // Update UI
+            document.getElementById('universe-age').textContent = Math.floor(universeAge);
+            document.getElementById('total-particles').textContent = particles.length;
+            document.getElementById('soul-dust-active').textContent = soulDustParticles.length;
+            document.getElementById('quantum-events').textContent = quantumEvents;
+            document.getElementById('ai-creations').textContent = aiCreations;
+            
+            // Calculate average potential
+            let totalPotential = 0;
+            for (const particle of particles) {
+                totalPotential += Math.abs(particle.totalPotential || 0);
+            }
+            const avgPotential = totalPotential / particles.length;
+            document.getElementById('total-potential').textContent = avgPotential.toFixed(2);
+            
+            // Update performance
+            const info = renderer.info;
+            document.getElementById('fps').textContent = Math.round(1 / deltaTime);
+            document.getElementById('particle-count-display').textContent = particles.length + soulDustParticles.length;
+            document.getElementById('draw-calls').textContent = info.render.calls;
+            
+            // Update controls
+            if (controls && controls.enabled) {
+                controls.update();
+            }
+            
+            // Render
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch (e.key.toLowerCase()) {
+                case 'escape':
+                    toggleFullscreen();
+                    break;
+                case 'r':
+                    resetUniverse();
+                    break;
+                case 'a':
+                    toggleAudio();
+                    break;
+                case 'i':
+                    toggleAI();
+                    break;
+                case 'b':
+                    createSoulBurst();
+                    break;
+                case 'o':
+                    setCameraMode('orbit');
+                    break;
+                case 'f':
+                    setCameraMode('first-person');
+                    break;
+                case 'c':
+                    setCameraMode('free');
+                    break;
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
