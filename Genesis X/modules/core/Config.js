@@ -144,6 +144,15 @@ class Config {
                 maxFrequency: 20000
             },
             
+            // Global influence controls
+            influence: {
+                sensitivity: 1.0, // 0.0 - 2.0, multiplies audio impact everywhere
+                enableMicrophone: true,
+                affectSoulDust: true,
+                affectUnifiedFormula: true,
+                affectUVO: true
+            },
+
             // Audio to visual mapping
             mapping: {
                 frequencyToColor: {

@@ -269,6 +269,11 @@
                     <button onclick="window.UIManager.setCameraMode('first-person')">First-Person (F)</button>
                     <button onclick="window.UIManager.setCameraMode('cinematic')">Cinematic (C)</button>
                     <br><br>
+                    <p><strong>Audio Controls:</strong></p>
+                    <button onclick="window.UIManager.toggleAudio()">Toggle Audio</button>
+                    <label style="display:block; margin-top:6px;">Sensitivity: <span id="audio-sensitivity-value">100%</span></label>
+                    <input id="audio-sensitivity-slider" type="range" min="0" max="200" value="100" step="1" />
+                    <br><br>
                     <p><strong>Actions:</strong></p>
                     <button onclick="window.UIManager.resetView()">Reset View</button>
                     <button onclick="window.UIManager.clearSoulDust()">Clear Soul Dust</button>
@@ -310,6 +315,9 @@
                     <p><strong>Particles:</strong> <span id="soul-dust-count">0</span></p>
                     <p><strong>Total Energy:</strong> <span id="soul-dust-energy">0</span></p>
                     <p><strong>Average Frequency:</strong> <span id="soul-dust-frequency">0Hz</span></p>
+                    <p><strong>Audio Amplitude:</strong> <span id="audio-amplitude">0.00</span></p>
+                    <p><strong>Spectral Complexity:</strong> <span id="audio-complexity">0.00</span></p>
+                    <p><strong>Microphone:</strong> <span id="microphone-status">Inactive</span></p>
                     <p><strong>Quantum Brain:</strong> <span id="quantum-brain-status">Inactive</span></p>
                     <br>
                     <button onclick="window.UIManager.clearSoulDust()">Clear All</button>
@@ -389,6 +397,7 @@
     <script src="modules/physics/CST.js"></script>
     
     <!-- Sensory Input (Formula of Creation) -->
+    <script src="modules/sensory/AudioManager.js"></script>
     <script src="modules/sensory/SensoryInputManager.js"></script>
     
     <!-- Soul Dust System -->

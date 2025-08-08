@@ -64,6 +64,18 @@ async function initializeAllComponents() {
         // Step 3: Initialize sensory components (Formula of Creation)
         console.log('🔧 Step 3: Initializing sensory components...');
         
+        if (window.AudioManager) {
+            try {
+                await window.AudioManager.initialize();
+                if (window.Config.get('audio.influence.enableMicrophone')) {
+                    window.AudioManager.start();
+                }
+                console.log('✅ AudioManager initialized and started');
+            } catch (e) {
+                console.warn('⚠️ AudioManager failed to initialize/start:', e.message);
+            }
+        }
+
         if (window.SensoryInputManager) {
             window.SensoryInputManager.initialize();
             console.log('✅ SensoryInputManager initialized');

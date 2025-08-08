@@ -145,6 +145,21 @@ class SensoryInputManager {
         // Update audio analysis
         this.updateAudioAnalysis();
         
+        // Transmit to UVO (vibrational substrate)
+        if (window.UVO && this.audioAnalysis) {
+            const sensitivity = window.Utils.getConfig('audio.influence.sensitivity', 1.0);
+            const scaled = {
+                frequency: this.audioAnalysis.frequency,
+                amplitude: this.audioAnalysis.amplitude * sensitivity,
+                spectralComplexity: this.audioAnalysis.spectralComplexity,
+                timestamp: this.audioAnalysis.timestamp,
+                buffer: this.frequencyData
+            };
+            if (window.Utils.getConfig('audio.influence.affectUVO', true)) {
+                window.UVO.transduceAudio(scaled);
+            }
+        }
+        
         // Generate Soul Dust particles
         this.updateSoulDustGeneration(deltaTime);
     }
@@ -154,6 +169,18 @@ class SensoryInputManager {
      */
     updateAudioAnalysis() {
         if (!this.analyser) return;
+        // Prefer AudioManager data if available
+        if (window.AudioManager && window.AudioManager.isInitialized) {
+            // Pull latest processed metrics from AudioManager
+            const stats = window.AudioManager.getAudioStats();
+            const last = window.AudioManager.audioHistory.length ? window.AudioManager.audioHistory[window.AudioManager.audioHistory.length - 1] : null;
+            if (last) {
+                this.audioAnalysis.frequency = last.frequency;
+                this.audioAnalysis.amplitude = last.amplitude;
+                this.audioAnalysis.spectralComplexity = last.spectralComplexity;
+                this.audioAnalysis.timestamp = last.timestamp;
+            }
+        }
         
         // Get frequency data
         this.analyser.getFloatFrequencyData(this.frequencyData);
@@ -302,9 +329,10 @@ class SensoryInputManager {
         
         try {
             // Create audio data for particle
+            const sensitivity = window.Utils.getConfig('audio.influence.sensitivity', 1.0);
             const audioData = {
                 frequency: this.audioAnalysis.frequency || 440,
-                amplitude: this.audioAnalysis.amplitude || 0.5,
+                amplitude: (this.audioAnalysis.amplitude || 0.5) * sensitivity,
                 spectralComplexity: this.audioAnalysis.spectralComplexity || 0,
                 timestamp: performance.now(),
                 buffer: this.frequencyData || new Float32Array(1024)
@@ -312,6 +340,9 @@ class SensoryInputManager {
             
             // Create Soul Dust particle
             const particle = new window.SoulDustParticle(audioData);
+            if (window.GenesisEngine && window.GenesisEngine.soulDustField) {
+                window.GenesisEngine.soulDustField.push(particle);
+            }
             
             // Publish particle creation event
             window.EventBus.publish('soulDust:particleCreated', {
