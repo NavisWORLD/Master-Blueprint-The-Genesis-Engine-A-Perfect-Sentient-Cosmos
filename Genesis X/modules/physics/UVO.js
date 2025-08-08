@@ -111,11 +111,15 @@ class UVO {
      */
     transduceAudio(audioData) {
         try {
+            if (!window.Utils.getConfig('audio.influence.affectUVO', true)) {
+                return null;
+            }
+            const sensitivity = window.Utils.getConfig('audio.influence.sensitivity', 1.0);
             const { frequency, amplitude, spectralComplexity, timestamp } = audioData;
             
             // Validate input ranges
-                    const validFrequency = window.Utils.clamp(frequency, this.frequencyRange[0], this.frequencyRange[1]);
-        const validAmplitude = window.Utils.clamp(amplitude, this.amplitudeRange[0], this.amplitudeRange[1]);
+            const validFrequency = window.Utils.clamp(frequency, this.frequencyRange[0], this.frequencyRange[1]);
+            const validAmplitude = window.Utils.clamp(amplitude * sensitivity, this.amplitudeRange[0], this.amplitudeRange[1]);
             
             // Calculate transduction efficiency
             const efficiency = this.calculateTransductionEfficiency(validFrequency, validAmplitude, spectralComplexity);

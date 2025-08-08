@@ -189,6 +189,17 @@ class UnifiedFormula {
                         potential += consciousnessInfluence;
                     }
                 }
+                // Modulate by live audio if enabled
+                const sensitivity = window.Utils.getConfig('audio.influence.sensitivity', 1.0);
+                const affect = window.Utils.getConfig('audio.influence.affectUnifiedFormula', true);
+                if (affect && window.SensoryInputManager && typeof window.SensoryInputManager.getAudioAnalysis === 'function') {
+                    const a = window.SensoryInputManager.getAudioAnalysis();
+                    if (a) {
+                        const amp = a.amplitude || 0;
+                        const comp = a.spectralComplexity || 0;
+                        potential *= (1.0 + amp * 0.5 * sensitivity) * (1.0 + comp * 0.25 * sensitivity);
+                    }
+                }
                 
                 return potential;
             }
@@ -325,7 +336,16 @@ class UnifiedFormula {
             const influenceRadius = window.Utils.getConfig('physics.cst.quantumEntanglementRange', 1000);
             if (distance <= influenceRadius) {
                 // Quantum brain force with consciousness factor
-                const magnitude = soulDust.currentEnergy * soulDust.consciousnessFactor / (distance * distance + 1);
+                let magnitude = soulDust.currentEnergy * soulDust.consciousnessFactor / (distance * distance + 1);
+                // Audio modulation
+                const sensitivity = window.Utils.getConfig('audio.influence.sensitivity', 1.0);
+                const affect = window.Utils.getConfig('audio.influence.affectUnifiedFormula', true);
+                if (affect && window.SensoryInputManager && typeof window.SensoryInputManager.getAudioAnalysis === 'function') {
+                    const a = window.SensoryInputManager.getAudioAnalysis();
+                    if (a) {
+                        magnitude *= (1.0 + (a.amplitude || 0) * 0.5 * sensitivity);
+                    }
+                }
                 
                 force.x += magnitude * dx / distance;
                 force.y += magnitude * dy / distance;

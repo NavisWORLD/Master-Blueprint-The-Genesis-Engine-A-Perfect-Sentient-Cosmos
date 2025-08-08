@@ -44,6 +44,14 @@ class UIManager {
         this.setupDraggableWindows();
         this.setupEventListeners();
         this.setupTabSystem();
+        // Initialize audio slider from config
+        const slider = document.getElementById('audio-sensitivity-slider');
+        const sensValEl = document.getElementById('audio-sensitivity-value');
+        if (slider && window.Config) {
+            const sensitivity = window.Config.get('audio.influence.sensitivity') ?? 1.0;
+            slider.value = Math.round(sensitivity * 100);
+            if (sensValEl) sensValEl.textContent = Math.round(sensitivity * 100) + '%';
+        }
         console.log('🖥️ UI Manager initialized');
     }
 
@@ -271,6 +279,9 @@ class UIManager {
         
         // Update soul dust display
         this.updateSoulDustDisplay();
+
+        // Update audio UI elements
+        this.updateAudioUI();
         
         // Update AI display
         this.updateAIDisplay();
@@ -326,10 +337,17 @@ class UIManager {
         const quantumBrainStatus = document.getElementById('quantum-brain-status');
         
         // This would be updated with actual Soul Dust data
-        if (soulDustCount) soulDustCount.textContent = '0';
-        if (soulDustEnergy) soulDustEnergy.textContent = '0';
-        if (soulDustFrequency) soulDustFrequency.textContent = '0Hz';
-        if (quantumBrainStatus) quantumBrainStatus.textContent = 'Inactive';
+        const field = (window.GenesisEngine && window.GenesisEngine.soulDustField) ? window.GenesisEngine.soulDustField : [];
+        if (soulDustCount) soulDustCount.textContent = field.length.toString();
+        if (soulDustEnergy) {
+            const totalEnergy = field.reduce((sum, p) => sum + (p.currentEnergy || 0), 0);
+            soulDustEnergy.textContent = totalEnergy.toFixed(2);
+        }
+        if (soulDustFrequency) {
+            const analysis = (window.SensoryInputManager && window.SensoryInputManager.getAudioAnalysis) ? window.SensoryInputManager.getAudioAnalysis() : null;
+            soulDustFrequency.textContent = analysis ? Math.round(analysis.frequency) + 'Hz' : '0Hz';
+        }
+        if (quantumBrainStatus) quantumBrainStatus.textContent = (window.QuantumEventManager && window.QuantumEventManager.getQuantumBrainState().isActive) ? 'Active' : 'Inactive';
     }
 
     /**
@@ -348,6 +366,32 @@ class UIManager {
             if (aiCreationCount) aiCreationCount.textContent = stats.creationCount;
             if (aiLastCreation) aiLastCreation.textContent = stats.lastCreation ? 'Recent' : 'Never';
         }
+    }
+
+    updateAudioUI() {
+        const ampEl = document.getElementById('audio-amplitude');
+        const compEl = document.getElementById('audio-complexity');
+        const micEl = document.getElementById('microphone-status');
+        const sensValEl = document.getElementById('audio-sensitivity-value');
+        const slider = document.getElementById('audio-sensitivity-slider');
+
+        if (slider && !slider._genesisBound) {
+            slider.addEventListener('input', () => {
+                const value = parseInt(slider.value, 10);
+                const normalized = value / 100; // 0.0 - 2.0
+                if (sensValEl) sensValEl.textContent = Math.round(normalized * 100) + '%';
+                if (window.Config) window.Config.set('audio.influence.sensitivity', normalized);
+            });
+            slider._genesisBound = true;
+        }
+
+        const analysis = (window.SensoryInputManager && window.SensoryInputManager.getAudioAnalysis) ? window.SensoryInputManager.getAudioAnalysis() : null;
+        if (analysis) {
+            if (ampEl) ampEl.textContent = analysis.amplitude.toFixed(2);
+            if (compEl) compEl.textContent = analysis.spectralComplexity.toFixed(2);
+        }
+
+        if (micEl) micEl.textContent = (window.AudioManager && window.AudioManager.isRecording) ? 'Active' : 'Inactive';
     }
 
     // Control methods
@@ -408,6 +452,22 @@ class UIManager {
     boostSoulDust() {
         // Boost soul dust energy
         console.log('✨ Boosting Soul Dust Energy');
+    }
+
+    toggleAudio() {
+        if (!window.AudioManager) return;
+        const enabled = window.Config ? window.Config.get('audio.influence.enableMicrophone') : true;
+        const next = !enabled;
+        if (window.Config) window.Config.set('audio.influence.enableMicrophone', next);
+        if (next) {
+            if (!window.AudioManager.isInitialized) {
+                window.AudioManager.initialize().then(() => window.AudioManager.start());
+            } else {
+                window.AudioManager.start();
+            }
+        } else {
+            window.AudioManager.stop();
+        }
     }
 
     /**

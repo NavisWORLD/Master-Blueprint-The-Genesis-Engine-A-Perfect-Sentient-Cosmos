@@ -578,6 +578,13 @@ class SoulDustParticle {
         console.log('✨ SoulDustParticle class initialized');
         return true;
     }
+
+    /**
+     * Check if environment supports safe creation
+     */
+    static canCreate() {
+        return (typeof THREE !== 'undefined') && !!window.Utils && window.Utils.isInitialized;
+    }
 }
 
 // Create global SoulDustParticle class
